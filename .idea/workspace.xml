@@ -31,7 +31,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.statement">
+  <component name="RunManager" selected="Python.main_app">
     <configuration name="PandasModel" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="alex_app" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -97,8 +97,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.statement" />
         <item itemvalue="Python.main_app" />
+        <item itemvalue="Python.statement" />
         <item itemvalue="Python.PandasModel" />
       </list>
     </recent_temporary>

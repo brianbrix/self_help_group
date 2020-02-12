@@ -34,6 +34,8 @@ class All_Payments(QtWidgets.QFrame):
         self.ui = all_payments.Ui_Frame()
         self.ui.setupUi(self)
 
+
+
 class TheApp:
     def __init__(self):
         self.all_members = All_Members()
@@ -52,6 +54,7 @@ class TheApp:
         self.name = ""
         self.national_id = ""
         self.email = ""
+        self.paragraph={}
 
     def radioToggled(self):
         if self.new_payment.ui.select_date.isChecked():
@@ -102,6 +105,13 @@ class TheApp:
             self.national_id = str(self.model.data(self.model.index(row, 1)).value())
             self.email = str(self.model.data(self.model.index(row, 4)).value())
             self.name = str(self.model.data(self.model.index(row, 0)).value())
+            membr_no = str(self.model.data(self.model.index(row, 2)).value())
+            phone_no = str(self.model.data(self.model.index(row, 3)).value())
+        self.paragraph["Member's Name"]=self.name
+        self.paragraph["National ID"]=self.national_id
+        self.paragraph["Membership Number"]=membr_no
+        self.paragraph["Phone Number"]=phone_no
+        self.paragraph["Official Email"]=self.email
 
     def deleteMember(self):
         lines = list()
@@ -148,6 +158,7 @@ class TheApp:
         df = pd.read_csv('payment.csv', names=["NAME", "NATIONAL ID", "DATE", "AMOUNT", "TRANSACTION CODE", "PAYMENT MODE"])
         df = df.reset_index()
         df = df.drop(['index'], axis=1)
+        statement.render_statement(df, self.paragraph)
         self.model2 = PandasModel.PandasModel(df)
         self.all_payments.ui.all_payments_view.setModel(self.model2)
         self.all_payments.ui.all_payments_view.horizontalHeader(
