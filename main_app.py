@@ -1,3 +1,4 @@
+import datetime
 import os
 
 from PyQt5 import QtWidgets, QtCore
@@ -5,7 +6,8 @@ from PyQt5.QtGui import QPixmap, QScreen
 from PyQt5.QtWidgets import QApplication, QHeaderView, QTableView, QMessageBox
 import csv
 import pandas as pd
-import new_member, members_list, new_payment, PandasModel,all_payments, statement
+import new_member, members_list, new_payment, PandasModel, all_payments, statement, print_statement
+from pandas import DataFrame
 
 
 class All_Members(QtWidgets.QMainWindow):
@@ -28,12 +30,19 @@ class New_Payment(QtWidgets.QDialog):
         self.ui = new_payment.Ui_Dialog()
         self.ui.setupUi(self)
 
+
 class All_Payments(QtWidgets.QFrame):
     def __init__(self):
         QtWidgets.QWidget.__init__(self, None)
         self.ui = all_payments.Ui_Frame()
         self.ui.setupUi(self)
 
+
+class PrintStatement(QtWidgets.QDialog):
+    def __init__(self):
+        QtWidgets.QWidget.__init__(self, None)
+        self.ui = print_statement.Ui_PrintStatement()
+        self.ui.setupUi(self)
 
 
 class TheApp:
@@ -43,18 +52,64 @@ class TheApp:
         self.displayMembers()
         self.add_member = Add_Member()
         self.new_payment = New_Payment()
-        self.all_payments=All_Payments()
+        self.all_payments = All_Payments()
+        self.print_statement = PrintStatement()
         # self.model=PandasModel.PandasModel()
         self.all_members.ui.addMemberBtn.clicked.connect(self.memberDetails)
         self.all_members.ui.members_list.clicked.connect(self.tableHasBeenClicked)
         self.all_members.ui.remove_member_btn.clicked.connect(self.deleteMember)
         self.all_members.ui.add_payment_btn.clicked.connect(self.paymentDetails)
         self.all_members.ui.view_all_payments.clicked.connect(self.viewAllPayments)
+        self.all_members.ui.statement_btn.clicked.connect(self.printStatement)
         self.new_payment.ui.select_date.toggled.connect(self.radioToggled)
+        self.print_statement.ui.yearly.toggled.connect(self.printRadioToggled)
+        self.print_statement.ui.monthly.toggled.connect(self.printRadioToggled)
+        self.print_statement.ui.quaterly.toggled.connect(self.printRadioToggled)
+        months=["01","02","03","04","05","06","07","08","09","10","11","12"]
+        years_back = 5
+        year = datetime.datetime.today().year
+        YEARS = [str(year - i) for i in range(years_back + 1)]
+        self.print_statement.ui.select_month.addItems(months)
+        self.print_statement.ui.select_year.addItems(YEARS)
         self.name = ""
         self.national_id = ""
         self.email = ""
-        self.paragraph={}
+        self.paragraph = {}
+
+    def printStatement(self):
+        self.print_statement.show()
+        if self.print_statement.exec_():
+            df = pd.read_csv("payment.csv", sep=r'\s*,\s*',
+                             names=["NAME", "NATIONAL ID", "DATE", "AMOUNT", "TRANSACTION CODE", "PAYMENT MODE"])
+            df = df[df["NAME"] == self.name]
+
+            df = df[df["NATIONAL ID"] == int(self.national_id)]
+            df = df.drop(columns=['NAME', 'NATIONAL ID'])
+            df2=DataFrame()
+            if self.print_statement.ui.monthly.isChecked():
+                year=self.print_statement.ui.select_year.currentText()
+                month=self.print_statement.ui.select_month.currentText()
+                df=df.loc[str(df['DATE']).split("/")[1]==month]
+                # for index, row in df.iterrows():
+                #     if str(row['DATE']).split("/")[1]==month and str(row['DATE']).split("/")[-1]==year:
+                #         df2.append(row)
+                #         print(df2)
+                # print(df2)
+                statement.render_statement(df2, self.paragraph)
+
+    def printRadioToggled(self):
+        if self.print_statement.ui.yearly.isChecked():
+            self.print_statement.ui.select_year.setEnabled(True)
+            self.print_statement.ui.select_month.setEnabled(False)
+            self.print_statement.ui.select_quarter.setEnabled(False)
+        if self.print_statement.ui.monthly.isChecked():
+            self.print_statement.ui.select_year.setEnabled(True)
+            self.print_statement.ui.select_month.setEnabled(True)
+            self.print_statement.ui.select_quarter.setEnabled(False)
+        if self.print_statement.ui.quaterly.isChecked():
+            self.print_statement.ui.select_year.setEnabled(True)
+            self.print_statement.ui.select_month.setEnabled(False)
+            self.print_statement.ui.select_quarter.setEnabled(True)
 
     def radioToggled(self):
         if self.new_payment.ui.select_date.isChecked():
@@ -107,11 +162,11 @@ class TheApp:
             self.name = str(self.model.data(self.model.index(row, 0)).value())
             membr_no = str(self.model.data(self.model.index(row, 2)).value())
             phone_no = str(self.model.data(self.model.index(row, 3)).value())
-        self.paragraph["Member's Name"]=self.name
-        self.paragraph["National ID"]=self.national_id
-        self.paragraph["Membership Number"]=membr_no
-        self.paragraph["Phone Number"]=phone_no
-        self.paragraph["Official Email"]=self.email
+        self.paragraph["Member's Name"] = self.name
+        self.paragraph["National ID"] = self.national_id
+        self.paragraph["Membership Number"] = membr_no
+        self.paragraph["Phone Number"] = phone_no
+        self.paragraph["Official Email"] = self.email
 
     def deleteMember(self):
         lines = list()
@@ -155,10 +210,10 @@ class TheApp:
 
     def viewAllPayments(self):
         self.all_payments.show()
-        df = pd.read_csv('payment.csv', names=["NAME", "NATIONAL ID", "DATE", "AMOUNT", "TRANSACTION CODE", "PAYMENT MODE"])
+        df = pd.read_csv('payment.csv',
+                         names=["NAME", "NATIONAL ID", "DATE", "AMOUNT", "TRANSACTION CODE", "PAYMENT MODE"])
         df = df.reset_index()
         df = df.drop(['index'], axis=1)
-        statement.render_statement(df, self.paragraph)
         self.model2 = PandasModel.PandasModel(df)
         self.all_payments.ui.all_payments_view.setModel(self.model2)
         self.all_payments.ui.all_payments_view.horizontalHeader(
@@ -168,7 +223,6 @@ class TheApp:
             QTableView.SelectRows)
         self.all_payments.ui.all_payments_view.font().setPointSize(42);
         self.all_payments.ui.all_payments_view.setSortingEnabled(True)
-
 
 
 app = QApplication([])

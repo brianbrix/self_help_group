@@ -1,3 +1,4 @@
+import datetime
 import time
 
 from reportlab.lib import colors, styles
@@ -7,9 +8,10 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Tabl
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.platypus import *
+from reportlab.lib.enums import TA_LEFT
 
 doc = SimpleDocTemplate("statement.pdf", pagesize=A4,
-                        rightMargin=72, leftMargin=72,
+                        rightMargin=72, leftMargin=56,
                         topMargin=5, bottomMargin=18)
 def render_statement(data, paragraphss):
     Story = []
@@ -19,8 +21,7 @@ def render_statement(data, paragraphss):
     im2=Image(logo2, 7 * inch, 1 * inch)
     t_keep = KeepInFrame(0, 0, Story, mode='shrink', hAlign='CENTER', vAlign='MIDDLE')
     lista = [data.columns[:, ].values.astype(str).tolist()] + data.values.tolist()
-    print(lista)
-    t1=Table(lista,6*[1*inch,1*inch,1*inch,1*inch,2*inch,1.5*inch], (len(lista))*[0.3*inch],hAlign='CENTER')
+    t1=Table(lista,4*[1.5*inch,1.5*inch,2*inch,1.5*inch], (len(lista))*[0.3*inch],hAlign='CENTER')
 
     t1.setStyle(TableStyle([('ALIGN',(1,1),(-2,-2),'RIGHT'),
                        ('TEXTCOLOR',(1,1),(-2,-2),colors.red),
@@ -37,15 +38,26 @@ def render_statement(data, paragraphss):
     style = ParagraphStyle(
         name='Normal',
         fontSize=12,
+        borderPadding=1,
+        padding=1,
+        alignment=TA_LEFT,
+        leading=24,
+        leftMargin=10,
+
     )
-    p=""
     for x,y in paragraphss.items():
-        p+=x+":"+y
+        p = ""
+        p+='<b>'+x+'</b>'+":"+y
         p+="\n"
-    Story.append(Paragraph(p, style=style))
+        Story.append(Paragraph(p, style=style))
     Story.append(t1)
 
     Story.append(Spacer(1, 12))
     Story.append(im2)
     Story.append(t_keep)
     doc.build(Story)
+
+
+
+
+

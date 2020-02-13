@@ -4,3 +4,4 @@ pyuic5 new_member.ui -o new_member.py
 pyuic5 new_payment.ui -o new_payment.py
 pyuic5 payment_specific.ui -o payment_specific.py
 pyuic5 all_payments.ui -o all_payments.py
+pyuic5 print_statement.ui -o print_statement.py
