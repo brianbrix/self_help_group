@@ -1,0 +1,4 @@
+import requests
+header={"Access Token":"EAAHZBwgLU7TIBAPAZAbacPDITegUSzamUIoy0x7lZAlhXzs5yiLRBm4mIdwKhoNBHZAZAfrXEya4g2qPkqisQusNAtoV3xpFuUMDeuwSpmxe2VxY5Mqeh8Y1kZCi9xqPKQZCPy2pXSHY9JzILVZAlUZCsqumfbjaHPautSZAv6rVKBxvHBaKYregpi3pGd0U941CzgZBwu8EZByTXZC70hXpO3vGBnJmIpVC6Sa7ifZANf2zvBNQZDZD"}
+r=requests.get("http://graph.facebook.com/v6.0/196822814242951",headers=header)
+print(r.text)

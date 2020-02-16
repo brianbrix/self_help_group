@@ -66,36 +66,63 @@ class TheApp:
         self.print_statement.ui.monthly.toggled.connect(self.printRadioToggled)
         self.print_statement.ui.quaterly.toggled.connect(self.printRadioToggled)
         months=["01","02","03","04","05","06","07","08","09","10","11","12"]
+        quarters=["First Quarter","Second Quarter","Third Quarter", "Fourth Quarter"]
         years_back = 5
         year = datetime.datetime.today().year
         YEARS = [str(year - i) for i in range(years_back + 1)]
         self.print_statement.ui.select_month.addItems(months)
         self.print_statement.ui.select_year.addItems(YEARS)
+        self.print_statement.ui.select_quarter.addItems(quarters)
         self.name = ""
         self.national_id = ""
         self.email = ""
         self.paragraph = {}
 
     def printStatement(self):
+        quarterly=False
         self.print_statement.show()
         if self.print_statement.exec_():
-            df = pd.read_csv("payment.csv", sep=r'\s*,\s*',
+            df = pd.read_csv("payment.csv",
                              names=["NAME", "NATIONAL ID", "DATE", "AMOUNT", "TRANSACTION CODE", "PAYMENT MODE"])
             df = df[df["NAME"] == self.name]
 
             df = df[df["NATIONAL ID"] == int(self.national_id)]
             df = df.drop(columns=['NAME', 'NATIONAL ID'])
-            df2=DataFrame()
+            df2 = pd.DataFrame(columns=df.columns)
+            year = str(self.print_statement.ui.select_year.currentText())
+            month = str(self.print_statement.ui.select_month.currentText())
+            selected_quarter = str(self.print_statement.ui.select_quarter.currentText())
+            months_list=["January","February","March","April","May","June","July","August","September","October","November","December"]
+            quarter=""
+            if selected_quarter=="First Quarter":
+                quarter="1"
+            if selected_quarter=="Second Quarter":
+                quarter="2"
+            if selected_quarter=="Third Quarter":
+                quarter="3"
+            if selected_quarter=="Fourth Quarter":
+                quarter="4"
             if self.print_statement.ui.monthly.isChecked():
-                year=self.print_statement.ui.select_year.currentText()
-                month=self.print_statement.ui.select_month.currentText()
-                df=df.loc[str(df['DATE']).split("/")[1]==month]
-                # for index, row in df.iterrows():
-                #     if str(row['DATE']).split("/")[1]==month and str(row['DATE']).split("/")[-1]==year:
-                #         df2.append(row)
-                #         print(df2)
-                # print(df2)
-                statement.render_statement(df2, self.paragraph)
+                for index, row in df.iterrows():
+                    if month+"/"+year in str(row['DATE']):
+                        df2 = df2.append(row, ignore_index=True)
+            elif self.print_statement.ui.yearly.isChecked():
+                for index, row in df.iterrows():
+                    if year in str(row['DATE']):
+                        df2 = df2.append(row, ignore_index=True)
+            elif self.print_statement.ui.quaterly.isChecked():
+                if quarter=="1":
+                    first_monthly_sum=0
+                    for index, row in df.iterrows():
+                        if year in str(row['DATE']):
+                            if "02" in str(row['DATE']).split("/")[1] :
+                                df2 = df2.append(row, ignore_index=True)
+                                df2= df2.drop(columns=["TRANSACTION CODE"])
+                                first_monthly_sum+=float(df2["AMOUNT"])
+                quarterly = True
+            statement.render_statement(df2, self.paragraph, quarterly)
+
+
 
     def printRadioToggled(self):
         if self.print_statement.ui.yearly.isChecked():
