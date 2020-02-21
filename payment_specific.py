@@ -2,13 +2,11 @@
 
 # Form implementation generated from reading ui file 'payment_specific.ui'
 #
-# Created by: PyQt5 UI code generator 5.14.1
+# Created by: PyQt5 UI code generator 5.10.1
 #
 # WARNING! All changes made in this file will be lost!
 
-
 from PyQt5 import QtCore, QtGui, QtWidgets
-
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -64,3 +62,4 @@ class Ui_Dialog(object):
         self.label_2.setText(_translate("Dialog", "Select Month:"))
         self.radioButton.setText(_translate("Dialog", "Yearly"))
         self.label_3.setText(_translate("Dialog", "Select Quarter:"))
+

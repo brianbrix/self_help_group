@@ -2,13 +2,11 @@
 
 # Form implementation generated from reading ui file 'new_member.ui'
 #
-# Created by: PyQt5 UI code generator 5.14.1
+# Created by: PyQt5 UI code generator 5.10.1
 #
 # WARNING! All changes made in this file will be lost!
 
-
 from PyQt5 import QtCore, QtGui, QtWidgets
-
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -70,3 +68,4 @@ class Ui_Dialog(object):
         self.label_3.setText(_translate("Dialog", "Phone Number:"))
         self.label.setText(_translate("Dialog", "Name:"))
         self.member_name.setPlaceholderText(_translate("Dialog", "FirstName LastName"))
+

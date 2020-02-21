@@ -1,9 +1,9 @@
 import datetime
 import os
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, Qt
 from PyQt5.QtGui import QPixmap, QScreen
-from PyQt5.QtWidgets import QApplication, QHeaderView, QTableView, QMessageBox
+from PyQt5.QtWidgets import QApplication, QHeaderView, QTableView, QMessageBox, QFileDialog
 import csv
 import pandas as pd
 import new_member, members_list, new_payment, PandasModel, all_payments, statement, print_statement
@@ -65,8 +65,8 @@ class TheApp:
         self.print_statement.ui.yearly.toggled.connect(self.printRadioToggled)
         self.print_statement.ui.monthly.toggled.connect(self.printRadioToggled)
         self.print_statement.ui.quaterly.toggled.connect(self.printRadioToggled)
-        months=["01","02","03","04","05","06","07","08","09","10","11","12"]
-        quarters=["First Quarter","Second Quarter","Third Quarter", "Fourth Quarter"]
+        months = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
+        quarters = ["First Quarter", "Second Quarter", "Third Quarter", "Fourth Quarter"]
         years_back = 5
         year = datetime.datetime.today().year
         YEARS = [str(year - i) for i in range(years_back + 1)]
@@ -79,50 +79,143 @@ class TheApp:
         self.paragraph = {}
 
     def printStatement(self):
-        quarterly=False
+        self.printRadioToggled()
+        quarterly = False
         self.print_statement.show()
         if self.print_statement.exec_():
-            df = pd.read_csv("payment.csv",
-                             names=["NAME", "NATIONAL ID", "DATE", "AMOUNT", "TRANSACTION CODE", "PAYMENT MODE"])
-            df = df[df["NAME"] == self.name]
+            fileName, _ = QFileDialog.getSaveFileName(
+                self.all_members, 'Save as... File', './', filter='PDF Files(*.pdf);;')
+            if fileName:
+                df = pd.read_csv("payment.csv",
+                                 names=["NAME", "NATIONAL ID", "DATE", "AMOUNT", "TRANSACTION CODE", "PAYMENT MODE"])
+                df = df[df["NAME"] == self.name]
 
-            df = df[df["NATIONAL ID"] == int(self.national_id)]
-            df = df.drop(columns=['NAME', 'NATIONAL ID'])
-            df2 = pd.DataFrame(columns=df.columns)
-            year = str(self.print_statement.ui.select_year.currentText())
-            month = str(self.print_statement.ui.select_month.currentText())
-            selected_quarter = str(self.print_statement.ui.select_quarter.currentText())
-            months_list=["January","February","March","April","May","June","July","August","September","October","November","December"]
-            quarter=""
-            if selected_quarter=="First Quarter":
-                quarter="1"
-            if selected_quarter=="Second Quarter":
-                quarter="2"
-            if selected_quarter=="Third Quarter":
-                quarter="3"
-            if selected_quarter=="Fourth Quarter":
-                quarter="4"
-            if self.print_statement.ui.monthly.isChecked():
-                for index, row in df.iterrows():
-                    if month+"/"+year in str(row['DATE']):
-                        df2 = df2.append(row, ignore_index=True)
-            elif self.print_statement.ui.yearly.isChecked():
-                for index, row in df.iterrows():
-                    if year in str(row['DATE']):
-                        df2 = df2.append(row, ignore_index=True)
-            elif self.print_statement.ui.quaterly.isChecked():
-                if quarter=="1":
-                    first_monthly_sum=0
+                df = df[df["NATIONAL ID"] == int(self.national_id)]
+                df = df.drop(columns=['NAME', 'NATIONAL ID'])
+                df2 = pd.DataFrame(columns=df.columns)
+                year = str(self.print_statement.ui.select_year.currentText())
+                month = str(self.print_statement.ui.select_month.currentText())
+                selected_quarter = str(self.print_statement.ui.select_quarter.currentText())
+                if self.print_statement.ui.monthly.isChecked():
+                    for index, row in df.iterrows():
+                        if month + "/" + year in str(row['DATE']):
+                            df2 = df2.append(row, ignore_index=True)
+                    totals = ["TOTAL", df2["AMOUNT"].apply(pd.to_numeric).sum(), "", ""]
+                    a_series = pd.Series(totals, index=df2.columns)
+                    df2 = df2.append(a_series, ignore_index=True)
+                elif self.print_statement.ui.yearly.isChecked():
                     for index, row in df.iterrows():
                         if year in str(row['DATE']):
-                            if "02" in str(row['DATE']).split("/")[1] :
-                                df2 = df2.append(row, ignore_index=True)
-                                df2= df2.drop(columns=["TRANSACTION CODE"])
-                                first_monthly_sum+=float(df2["AMOUNT"])
-                quarterly = True
-            statement.render_statement(df2, self.paragraph, quarterly)
+                            df2 = df2.append(row, ignore_index=True)
+                    totals = ["TOTAL", df2["AMOUNT"].apply(pd.to_numeric).sum(), "", ""]
+                    a_series = pd.Series(totals, index=df2.columns)
+                    df2 = df2.append(a_series, ignore_index=True)
+                elif self.print_statement.ui.quaterly.isChecked():
+                    monthly = []
+                    if selected_quarter == "First Quarter":
+                        monthly.append({"Month": "January", "Total": ""})
+                        monthly.append({"Month": "February", "Total": ""})
+                        monthly.append({"Month": "March", "Total": ""})
+                        first_monthly_sum = 0
+                        second_monthly_sum = 0
+                        third_mothly_sum = 0
+                        for index, row in df.iterrows():
+                            if year in str(row['DATE']):
+                                if "01" in str(row["DATE"]).split("/")[1]:
+                                    first_monthly_sum += float(row["AMOUNT"])
+                                    for x in monthly:
+                                        if x["Month"] == "January":
+                                            x["Total"] = str(first_monthly_sum)
+                                if "02" in str(row["DATE"]).split("/")[1]:
+                                    second_monthly_sum += float(row["AMOUNT"])
+                                    for x in monthly:
+                                        if x["Month"] == "February":
+                                            x["Total"] = str(second_monthly_sum)
+                                if "03" in str(row["DATE"]).split("/")[1]:
+                                    third_mothly_sum += float(row["AMOUNT"])
+                                    for x in monthly:
+                                        if x["Month"] == "March":
+                                            x["Total"] = str(third_mothly_sum)
+                    if selected_quarter == "Second Quarter":
+                        monthly.append({"Month": "April", "Total": ""})
+                        monthly.append({"Month": "May", "Total": ""})
+                        monthly.append({"Month": "June", "Total": ""})
+                        first_monthly_sum = 0
+                        second_monthly_sum = 0
+                        third_mothly_sum = 0
+                        for index, row in df.iterrows():
+                            if year in str(row['DATE']):
+                                if "04" in str(row["DATE"]).split("/")[1]:
+                                    first_monthly_sum += float(row["AMOUNT"])
+                                    for x in monthly:
+                                        if x["Month"] == "April":
+                                            x["Total"] = str(first_monthly_sum)
+                                if "05" in str(row["DATE"]).split("/")[1]:
+                                    second_monthly_sum += float(row["AMOUNT"])
+                                    for x in monthly:
+                                        if x["Month"] == "May":
+                                            x["Total"] = str(second_monthly_sum)
+                                if "06" in str(row["DATE"]).split("/")[1]:
+                                    third_mothly_sum += float(row["AMOUNT"])
+                                    for x in monthly:
+                                        if x["Month"] == "June":
+                                            x["Total"] = str(third_mothly_sum)
+                    if selected_quarter == "Third Quarter":
+                        monthly.append({"Month": "July", "Total": ""})
+                        monthly.append({"Month": "August", "Total": ""})
+                        monthly.append({"Month": "September", "Total": ""})
+                        first_monthly_sum = 0
+                        second_monthly_sum = 0
+                        third_mothly_sum = 0
+                        for index, row in df.iterrows():
+                            if year in str(row['DATE']):
+                                if "07" in str(row["DATE"]).split("/")[1]:
+                                    first_monthly_sum += float(row["AMOUNT"])
+                                    for x in monthly:
+                                        if x["Month"] == "July":
+                                            x["Total"] = str(first_monthly_sum)
+                                if "08" in str(row["DATE"]).split("/")[1]:
+                                    second_monthly_sum += float(row["AMOUNT"])
+                                    for x in monthly:
+                                        if x["Month"] == "August":
+                                            x["Total"] = str(second_monthly_sum)
+                                if "09" in str(row["DATE"]).split("/")[1]:
+                                    third_mothly_sum += float(row["AMOUNT"])
+                                    for x in monthly:
+                                        if x["Month"] == "September":
+                                            x["Total"] = str(third_mothly_sum)
+                    if selected_quarter == "Fourth Quarter":
+                        monthly.append({"Month": "October", "Total": ""})
+                        monthly.append({"Month": "November", "Total": ""})
+                        monthly.append({"Month": "December", "Total": ""})
+                        first_monthly_sum = 0
+                        second_monthly_sum = 0
+                        third_mothly_sum = 0
+                        for index, row in df.iterrows():
+                            if year in str(row['DATE']):
+                                if "10" in str(row["DATE"]).split("/")[1]:
+                                    first_monthly_sum += float(row["AMOUNT"])
+                                    for x in monthly:
+                                        if x["Month"] == "October":
+                                            x["Total"] = str(first_monthly_sum)
+                                if "11" in str(row["DATE"]).split("/")[1]:
+                                    second_monthly_sum += float(row["AMOUNT"])
+                                    for x in monthly:
+                                        if x["Month"] == "November":
+                                            x["Total"] = str(second_monthly_sum)
+                                if "12" in str(row["DATE"]).split("/")[1]:
+                                    third_mothly_sum += float(row["AMOUNT"])
+                                    for x in monthly:
+                                        if x["Month"] == "December":
+                                            x["Total"] = str(third_mothly_sum)
 
-
+                    df2 = pd.DataFrame.from_records(monthly)
+                    df2.columns = map(str.upper, df2.columns)
+                    totals = ["TOTAL QUARTERLY", df2["TOTAL"].apply(pd.to_numeric).sum()]
+                    a_series = pd.Series(totals, index=df2.columns)
+                    df2 = df2.append(a_series, ignore_index=True)
+                    quarterly = True
+                statement.render_statement(df2, self.paragraph, quarterly, fileName)
 
     def printRadioToggled(self):
         if self.print_statement.ui.yearly.isChecked():

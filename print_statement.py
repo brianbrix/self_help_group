@@ -2,13 +2,11 @@
 
 # Form implementation generated from reading ui file 'print_statement.ui'
 #
-# Created by: PyQt5 UI code generator 5.14.1
+# Created by: PyQt5 UI code generator 5.10.1
 #
 # WARNING! All changes made in this file will be lost!
 
-
 from PyQt5 import QtCore, QtGui, QtWidgets
-
 
 class Ui_PrintStatement(object):
     def setupUi(self, PrintStatement):
@@ -64,3 +62,4 @@ class Ui_PrintStatement(object):
         self.label_2.setText(_translate("PrintStatement", "Select Month:"))
         self.yearly.setText(_translate("PrintStatement", "Yearly"))
         self.label_3.setText(_translate("PrintStatement", "Select Quarter:"))
+

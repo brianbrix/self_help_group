@@ -2,13 +2,11 @@
 
 # Form implementation generated from reading ui file 'all_payments.ui'
 #
-# Created by: PyQt5 UI code generator 5.14.1
+# Created by: PyQt5 UI code generator 5.10.1
 #
 # WARNING! All changes made in this file will be lost!
 
-
 from PyQt5 import QtCore, QtGui, QtWidgets
-
 
 class Ui_Frame(object):
     def setupUi(self, Frame):
@@ -30,3 +28,4 @@ class Ui_Frame(object):
         _translate = QtCore.QCoreApplication.translate
         Frame.setWindowTitle(_translate("Frame", "All Payments"))
         self.lineEdit.setPlaceholderText(_translate("Frame", "Search"))
+

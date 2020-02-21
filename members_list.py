@@ -2,13 +2,11 @@
 
 # Form implementation generated from reading ui file 'members_list.ui'
 #
-# Created by: PyQt5 UI code generator 5.14.1
+# Created by: PyQt5 UI code generator 5.10.1
 #
 # WARNING! All changes made in this file will be lost!
 
-
 from PyQt5 import QtCore, QtGui, QtWidgets
-
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -42,7 +40,7 @@ class Ui_MainWindow(object):
         self.gridLayout.addWidget(self.view_all_payments, 3, 0, 1, 2)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 480, 18))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 480, 22))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -60,3 +58,4 @@ class Ui_MainWindow(object):
         self.add_payment_btn.setText(_translate("MainWindow", "Add Payment for selected"))
         self.statement_btn.setText(_translate("MainWindow", "Download Statement for selected"))
         self.view_all_payments.setText(_translate("MainWindow", "View All Payments"))
+

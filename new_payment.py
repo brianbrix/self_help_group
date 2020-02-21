@@ -2,13 +2,11 @@
 
 # Form implementation generated from reading ui file 'new_payment.ui'
 #
-# Created by: PyQt5 UI code generator 5.14.1
+# Created by: PyQt5 UI code generator 5.10.1
 #
 # WARNING! All changes made in this file will be lost!
 
-
 from PyQt5 import QtCore, QtGui, QtWidgets
-
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -73,3 +71,4 @@ class Ui_Dialog(object):
         self.label_2.setText(_translate("Dialog", "Transaction Code:"))
         self.date_today.setText(_translate("Dialog", "Today"))
         self.label_4.setText(_translate("Dialog", "Payment Mode:"))
+
