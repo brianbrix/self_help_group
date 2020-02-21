@@ -66,6 +66,8 @@ class TheApp:
         self.print_statement.ui.monthly.toggled.connect(self.printRadioToggled)
         self.print_statement.ui.quaterly.toggled.connect(self.printRadioToggled)
         months = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
+        self.month_names = ["January", "February", "March", "April", "May", "June", "July", "August", "September",
+                            "October", "November", "December"]
         quarters = ["First Quarter", "Second Quarter", "Third Quarter", "Fourth Quarter"]
         years_back = 5
         year = datetime.datetime.today().year
@@ -84,7 +86,7 @@ class TheApp:
         self.print_statement.show()
         if self.print_statement.exec_():
             fileName, _ = QFileDialog.getSaveFileName(
-                self.all_members, 'Save as... File', './', filter='PDF Files(*.pdf);;')
+                self.all_members, 'Save as... File', './', filter='PDF Files(*.pdf)')
             if fileName:
                 df = pd.read_csv("payment.csv",
                                  names=["NAME", "NATIONAL ID", "DATE", "AMOUNT", "TRANSACTION CODE", "PAYMENT MODE"])
@@ -103,6 +105,7 @@ class TheApp:
                     totals = ["TOTAL", df2["AMOUNT"].apply(pd.to_numeric).sum(), "", ""]
                     a_series = pd.Series(totals, index=df2.columns)
                     df2 = df2.append(a_series, ignore_index=True)
+                    self.paragraph["Period"] = self.month_names[int(month) - 1] + "\t" + year
                 elif self.print_statement.ui.yearly.isChecked():
                     for index, row in df.iterrows():
                         if year in str(row['DATE']):
@@ -110,6 +113,7 @@ class TheApp:
                     totals = ["TOTAL", df2["AMOUNT"].apply(pd.to_numeric).sum(), "", ""]
                     a_series = pd.Series(totals, index=df2.columns)
                     df2 = df2.append(a_series, ignore_index=True)
+                    self.paragraph["Period"] = "Year " + year
                 elif self.print_statement.ui.quaterly.isChecked():
                     monthly = []
                     if selected_quarter == "First Quarter":
@@ -214,6 +218,7 @@ class TheApp:
                     totals = ["TOTAL QUARTERLY", df2["TOTAL"].apply(pd.to_numeric).sum()]
                     a_series = pd.Series(totals, index=df2.columns)
                     df2 = df2.append(a_series, ignore_index=True)
+                    self.paragraph["Period"] = "Year " + year + " " + selected_quarter
                     quarterly = True
                 statement.render_statement(df2, self.paragraph, quarterly, fileName)
 

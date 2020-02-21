@@ -28,7 +28,7 @@ def render_statement(data, paragraphss, quarterly, fileName):
         t1 = Table(lista, 4 * [1.5 * inch, 1.5 * inch, 2 * inch, 1.5 * inch], (len(lista)) * [0.3 * inch],
                    hAlign='CENTER')
     else:
-        t1 = Table(lista, 2 * [2.5 * inch, 2.5 * inch], (len(lista)) * [0.3 * inch],
+        t1 = Table(lista, 2 * [3.2 * inch, 3.2 * inch], (len(lista)) * [0.3 * inch],
                    hAlign='CENTER')
 
     # t1.setStyle(TableStyle([('ALIGN', (1, 1), (-2, -2), 'RIGHT'),
