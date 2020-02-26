@@ -24,6 +24,16 @@
    <item row="1" column="0">
     <widget class="QTableView" name="all_payments_view"/>
    </item>
+   <item row="2" column="0">
+    <widget class="QPushButton" name="delete_selected_button">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="text">
+      <string>Delete Selected</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources/>

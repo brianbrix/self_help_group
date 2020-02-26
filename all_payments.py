@@ -20,6 +20,10 @@ class Ui_Frame(object):
         self.all_payments_view = QtWidgets.QTableView(Frame)
         self.all_payments_view.setObjectName("all_payments_view")
         self.gridLayout.addWidget(self.all_payments_view, 1, 0, 1, 1)
+        self.delete_selected_button = QtWidgets.QPushButton(Frame)
+        self.delete_selected_button.setEnabled(False)
+        self.delete_selected_button.setObjectName("delete_selected_button")
+        self.gridLayout.addWidget(self.delete_selected_button, 2, 0, 1, 1)
 
         self.retranslateUi(Frame)
         QtCore.QMetaObject.connectSlotsByName(Frame)
@@ -28,4 +32,5 @@ class Ui_Frame(object):
         _translate = QtCore.QCoreApplication.translate
         Frame.setWindowTitle(_translate("Frame", "All Payments"))
         self.lineEdit.setPlaceholderText(_translate("Frame", "Search"))
+        self.delete_selected_button.setText(_translate("Frame", "Delete Selected"))
 

@@ -43,7 +43,10 @@ def render_statement(data, paragraphss, quarterly, fileName):
     #                         ]))
     t1.setStyle(TableStyle(
         [("BOX", (0, 0), (-1, -1), 0.25, colors.black),
-         ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black)]
+         ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+         ('TEXTCOLOR', (0, -1), (-1, -1), colors.green),
+         ('FONTNAME', (0, -1), (-1, -1), 'Courier-Bold')
+         ]
     ))
     data_len = len(lista)
 
@@ -54,6 +57,9 @@ def render_statement(data, paragraphss, quarterly, fileName):
             bg_color = colors.lightgrey
 
         t1.setStyle(TableStyle([('BACKGROUND', (0, each), (-1, each), bg_color)]))
+        if each == data_len:
+            t1.setStyle(TableStyle([('FONTNAME', (0, each), (0, each), 'Courier-Bold')]))
+            t1.setStyle(TableStyle([('BACKGROUND', (0, each), (0, each), colors.green)]))
     Story.append(im)
     style = ParagraphStyle(
         name='Normal',

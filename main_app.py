@@ -1,13 +1,21 @@
+import csv
 import datetime
 import os
+from functools import partial
 
-from PyQt5 import QtWidgets, QtCore, Qt
-from PyQt5.QtGui import QPixmap, QScreen
-from PyQt5.QtWidgets import QApplication, QHeaderView, QTableView, QMessageBox, QFileDialog
-import csv
 import pandas as pd
-import new_member, members_list, new_payment, PandasModel, all_payments, statement, print_statement
-from pandas import DataFrame
+from PyQt5 import QtWidgets, QtCore, Qt
+from PyQt5.QtGui import QKeySequence
+from PyQt5.QtWidgets import QApplication, QHeaderView, QTableView, QMessageBox, QFileDialog, QShortcut, \
+    QAbstractItemView
+
+import PandasModel
+import all_payments
+import members_list
+import new_member
+import new_payment
+import print_statement
+import statement
 
 
 class All_Members(QtWidgets.QMainWindow):
@@ -33,7 +41,7 @@ class New_Payment(QtWidgets.QDialog):
 
 class All_Payments(QtWidgets.QFrame):
     def __init__(self):
-        QtWidgets.QWidget.__init__(self, None)
+        QtWidgets.QWidget.__init__(self, None, QtCore.Qt.WindowStaysOnTopHint)
         self.ui = all_payments.Ui_Frame()
         self.ui.setupUi(self)
 
@@ -65,6 +73,11 @@ class TheApp:
         self.print_statement.ui.yearly.toggled.connect(self.printRadioToggled)
         self.print_statement.ui.monthly.toggled.connect(self.printRadioToggled)
         self.print_statement.ui.quaterly.toggled.connect(self.printRadioToggled)
+        self.all_payments.ui.all_payments_view.clicked.connect(partial(self.all_payments.ui.delete_selected_button.setEnabled,True))
+        # self.all_payments.ui.all_payments_view.setEditTriggers(QAbstractItemView.SelectedClicked)
+        # keyPress=QShortcut(QKeySequence(Qt.Qt.Key_Return), self.all_payments.ui.all_payments_view)
+        # keyPress.activated.connect(self.editPayment)
+        self.all_payments.ui.delete_selected_button.clicked.connect(self.deletePayment)
         months = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
         self.month_names = ["January", "February", "March", "April", "May", "June", "July", "August", "September",
                             "October", "November", "December"]
@@ -79,6 +92,37 @@ class TheApp:
         self.national_id = ""
         self.email = ""
         self.paragraph = {}
+
+    def keyPressEvent(self, e):
+        print("event", e)
+        if e.key() == Qt.Qt.Key_Return or e.key() == Qt.Qt.Key_Enter:
+            print(' return')
+
+    def deletePayment(self):
+        name = ""
+        t_code = ""
+        amount = ""
+        for index in sorted(self.all_payments.ui.all_payments_view.selectionModel().selectedRows()):
+            row = index.row()
+            t_code = str(self.model2.data(self.model2.index(row, 4)).value())
+            amount = str(self.model2.data(self.model2.index(row, 3)).value())
+            name = str(self.model2.data(self.model2.index(row, 0)).value())
+        lines = list()
+        confirm = QMessageBox.question(self.all_payments, "Confirm delete",
+                                       "Are you sure you want to delete transaction " + t_code + " of Ksh " + amount + " for " + name + "?",
+                                       QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if confirm == QMessageBox.Yes:
+            with open('payment.csv', 'r') as readFile:
+                reader = csv.reader(readFile)
+                for row in reader:
+                    lines.append(row)
+                    if row[0] == name and row[4] == t_code:
+                        lines.remove(row)
+            with open('payment.csv', 'w') as writeFile:
+                writer = csv.writer(writeFile)
+                writer.writerows(lines)
+        self.viewAllPayments()
+        self.all_payments.ui.delete_selected_button.setEnabled(False)
 
     def printStatement(self):
         self.printRadioToggled()
@@ -215,7 +259,7 @@ class TheApp:
 
                     df2 = pd.DataFrame.from_records(monthly)
                     df2.columns = map(str.upper, df2.columns)
-                    totals = ["TOTAL QUARTERLY", df2["TOTAL"].apply(pd.to_numeric).sum()]
+                    totals = ["TOTAL QUARTERLY", df2["AMOUNT"].apply(pd.to_numeric).sum()]
                     a_series = pd.Series(totals, index=df2.columns)
                     df2 = df2.append(a_series, ignore_index=True)
                     self.paragraph["Period"] = "Year " + year + " " + selected_quarter
