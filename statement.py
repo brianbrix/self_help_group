@@ -11,9 +11,11 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.platypus import *
 from reportlab.lib.enums import TA_LEFT
-
-os.chmod("C:\Program Files\self_help_group\logos/toplogo.png", 0o777)
-os.chmod("C:\Program Files\self_help_group\logos/bottomlogo.png", 0o777)
+try:
+    os.chmod("C:\Program Files\self_help_group\logos/toplogo.png", 0o777)
+    os.chmod("C:\Program Files\self_help_group\logos/bottomlogo.png", 0o777)
+except Exception as e:
+    print(e)
 def render_statement(data, paragraphss, quarterly, fileName):
     doc = SimpleDocTemplate(fileName, pagesize=A4,
                             rightMargin=72, leftMargin=56,
