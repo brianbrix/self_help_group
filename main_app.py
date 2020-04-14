@@ -38,11 +38,11 @@ def ping(target):
 
 # Client ID:56840225204-2l4pp6r6ohfd7csh761p4mqq6gupbdkb.apps.googleusercontent.com
 # Client Secret: SWwST6so3xCzfibL2aU1sZ_k
-try:
-    os.chmod("C:/Users/ALEX/Desktop/slef_help/payment.csv", 0o777)
-    os.chmod("C:/Users/ALEX/Desktop/slef_help/members.csv", 0o777)
-except Exception as e:
-    print(e)
+# try:
+#     os.chmod("C:/Users/ALEX/Desktop/slef_help/payment.csv", 0o777)
+#     os.chmod("C:/Users/ALEX/Desktop/slef_help/members.csv", 0o777)
+# except Exception as e:
+#     print(e)
 
 
 class All_Members(QtWidgets.QMainWindow):
@@ -161,6 +161,7 @@ class TheApp:
         if self.home_page.ui.engine_select.currentText() == "CSV Files":
             self.home_page.ui.label_3.setEnabled(True)
             self.home_page.ui.csv_folder_select.setEnabled(True)
+            self.selectCsvFilesFolder()
         else:
             self.home_page.ui.label_3.setEnabled(False)
             self.home_page.ui.csv_folder_select.setEnabled(False)
@@ -169,7 +170,22 @@ class TheApp:
         print("DB")
 
     def selectCsvFilesFolder(self):
-        print("Directory")
+        folder = QFileDialog.getExistingDirectory(self.home_page, "Select Directory")
+        try:
+            payments_file = os.path.join(folder, "payment.csv")
+            members_file = os.path.join(folder, "members.csv")
+            if not os.path.exists(payments_file):
+                open(payments_file, "w")
+            if not os.path.exists(members_file):
+                open(members_file, "w")
+            os.environ["PAYMENTS_FILE"] = str(payments_file)
+            os.environ["MEMBERS_FILE"] = str(members_file)
+            os.chmod(payments_file, 0o777)
+            os.chmod(members_file, 0o777)
+            self.home_page.ui.csv_folder_select.setText(str(folder))
+            self.displayMembers()
+        except Exception as e:
+            print(e)
 
     def deletePayment(self):
         name = ""
@@ -186,14 +202,14 @@ class TheApp:
                                        QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if confirm == QMessageBox.Yes:
             try:
-                with open('C:/Users/ALEX/Desktop/slef_help/payment.csv', 'r') as readFile:
+                with open(os.environ["PAYMENTS_FILE"], 'r') as readFile:
                     reader = csv.reader(readFile)
                     for row in reader:
                         if len(row) > 2:
                             lines.append(row)
                             if row[0] == name and row[4] == t_code:
                                 lines.remove(row)
-                with open('C:/Users/ALEX/Desktop/slef_help/payment.csv', 'w') as writeFile:
+                with open(os.environ["PAYMENTS_FILE"], 'w') as writeFile:
                     writer = csv.writer(writeFile)
                     writer.writerows(lines)
             except Exception as e:
@@ -206,14 +222,22 @@ class TheApp:
         return "{:.2f}".format(float(x))
 
     def printStatement(self):
+        temp_path = ""
+        if operating_system == 'Windows':
+            temp_path = os.path.join(os.path.expanduser(
+                '~'), 'Downloads/').replace('\\\\', '\\')
+        if operating_system == 'Linux':
+            temp_path = os.path.join(
+                os.path.expanduser('~'),
+                'Downloads/')
         self.printRadioToggled()
         quarterly = False
         self.print_statement.show()
         if self.print_statement.exec_():
             fileName, _ = QFileDialog.getSaveFileName(
-                self.all_members, 'Save as... File', 'C:/Users/ALEX/Desktop/', filter='PDF Files(*.pdf)')
+                self.all_members, 'Save as... File', temp_path, filter='PDF Files(*.pdf)')
             if fileName:
-                df = pd.read_csv("C:/Users/ALEX/Desktop/slef_help/payment.csv",
+                df = pd.read_csv(os.environ["PAYMENTS_FILE"],
                                  names=["NAME", "NATIONAL ID", "DATE", "AMOUNT", "TRANSACTION CODE", "PAYMENT MODE"])
                 df = df[df["NAME"] == self.name]
 
@@ -227,7 +251,9 @@ class TheApp:
                     for index, row in df.iterrows():
                         if month + "/" + year in str(row['DATE']):
                             df2 = df2.append(row, ignore_index=True)
-                    totals = ["TOTAL", df2["AMOUNT"].str.replace(",", "").apply(pd.to_numeric).sum(), "", ""]
+                    if "," in df2["AMOUNT"]:
+                        df2["AMOUNT"] = df2["AMOUNT"].str.replace(",", "")
+                    totals = ["TOTAL", df2["AMOUNT"].apply(pd.to_numeric).sum(), "", ""]
                     a_series = pd.Series(totals, index=df2.columns)
                     df2 = df2.append(a_series, ignore_index=True)
                     df2 = df2.rename(columns={"AMOUNT": "AMOUNT(KSHs)"})
@@ -237,7 +263,9 @@ class TheApp:
                     for index, row in df.iterrows():
                         if year in str(row['DATE']):
                             df2 = df2.append(row, ignore_index=True)
-                    totals = ["TOTAL", df2["AMOUNT"].str.replace(",", "").apply(pd.to_numeric).sum(), "", ""]
+                    if "," in df2["AMOUNT"]:
+                        df2["AMOUNT"] = df2["AMOUNT"].str.replace(",", "")
+                    totals = ["TOTAL", df2["AMOUNT"].apply(pd.to_numeric).sum(), "", ""]
                     a_series = pd.Series(totals, index=df2.columns)
                     df2 = df2.append(a_series, ignore_index=True)
                     df2 = df2.rename(columns={"AMOUNT": "AMOUNT(KSHs)"})
@@ -253,19 +281,21 @@ class TheApp:
                         second_monthly_sum = 0
                         third_mothly_sum = 0
                         for index, row in df.iterrows():
+                            if "," in str(row["AMOUNT"]):
+                                row["AMOUNT"] = row["AMOUNT"].str.replace(",", "")
                             if year in str(row['DATE']):
                                 if "01" in str(row["DATE"]).split("/")[1]:
-                                    first_monthly_sum += float(row["AMOUNT"].replace(",", ""))
+                                    first_monthly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "January":
                                             x["Amount"] = str(first_monthly_sum)
                                 if "02" in str(row["DATE"]).split("/")[1]:
-                                    second_monthly_sum += float(row["AMOUNT"].replace(",", ""))
+                                    second_monthly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "February":
                                             x["Amount"] = str(second_monthly_sum)
                                 if "03" in str(row["DATE"]).split("/")[1]:
-                                    third_mothly_sum += float(row["AMOUNT"].replace(",", ""))
+                                    third_mothly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "March":
                                             x["Amount"] = str(third_mothly_sum)
@@ -277,19 +307,21 @@ class TheApp:
                         second_monthly_sum = 0
                         third_mothly_sum = 0
                         for index, row in df.iterrows():
+                            if "," in str(row["AMOUNT"]):
+                                row["AMOUNT"] = row["AMOUNT"].str.replace(",", "")
                             if year in str(row['DATE']):
                                 if "04" in str(row["DATE"]).split("/")[1]:
-                                    first_monthly_sum += float(row["AMOUNT"].replace(",", ""))
+                                    first_monthly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "April":
                                             x["Amount"] = str(first_monthly_sum)
                                 if "05" in str(row["DATE"]).split("/")[1]:
-                                    second_monthly_sum += float(row["AMOUNT"].replace(",", ""))
+                                    second_monthly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "May":
                                             x["Amount"] = str(second_monthly_sum)
                                 if "06" in str(row["DATE"]).split("/")[1]:
-                                    third_mothly_sum += float(row["AMOUNT"].replace(",", ""))
+                                    third_mothly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "June":
                                             x["Amount"] = str(third_mothly_sum)
@@ -301,19 +333,21 @@ class TheApp:
                         second_monthly_sum = 0
                         third_mothly_sum = 0
                         for index, row in df.iterrows():
+                            if "," in str(row["AMOUNT"]):
+                                row["AMOUNT"] = row["AMOUNT"].str.replace(",", "")
                             if year in str(row['DATE']):
                                 if "07" in str(row["DATE"]).split("/")[1]:
-                                    first_monthly_sum += float(row["AMOUNT"].replace(",", ""))
+                                    first_monthly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "July":
                                             x["Amount"] = str(first_monthly_sum)
                                 if "08" in str(row["DATE"]).split("/")[1]:
-                                    second_monthly_sum += float(row["AMOUNT"].replace(",", ""))
+                                    second_monthly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "August":
                                             x["Amount"] = str(second_monthly_sum)
                                 if "09" in str(row["DATE"]).split("/")[1]:
-                                    third_mothly_sum += float(row["AMOUNT"].replace(",", ""))
+                                    third_mothly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "September":
                                             x["Amount"] = str(third_mothly_sum)
@@ -325,26 +359,30 @@ class TheApp:
                         second_monthly_sum = 0
                         third_mothly_sum = 0
                         for index, row in df.iterrows():
+                            if "," in str(row["AMOUNT"]):
+                                row["AMOUNT"] = row["AMOUNT"].str.replace(",", "")
                             if year in str(row['DATE']):
                                 if "10" in str(row["DATE"]).split("/")[1]:
-                                    first_monthly_sum += float(row["AMOUNT"].replace(",", ""))
+                                    first_monthly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "October":
                                             x["Amount"] = str(first_monthly_sum)
                                 if "11" in str(row["DATE"]).split("/")[1]:
-                                    second_monthly_sum += float(row["AMOUNT"].replace(",", ""))
+                                    second_monthly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "November":
                                             x["Amount"] = str(second_monthly_sum)
                                 if "12" in str(row["DATE"]).split("/")[1]:
-                                    third_mothly_sum += float(row["AMOUNT"].replace(",", ""))
+                                    third_mothly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "December":
                                             x["Amount"] = str(third_mothly_sum)
 
                     df2 = pd.DataFrame.from_records(monthly)
                     df2.columns = map(str.upper, df2.columns)
-                    totals = ["TOTAL QUARTERLY", df2["AMOUNT"].replace(",", "").apply(pd.to_numeric).sum()]
+                    if "," in df2["AMOUNT"]:
+                        df2["AMOUNT"] = df2["AMOUNT"].str.replace(",", "")
+                    totals = ["TOTAL QUARTERLY", df2["AMOUNT"].apply(pd.to_numeric).sum()]
                     a_series = pd.Series(totals, index=df2.columns)
                     df2 = df2.append(a_series, ignore_index=True)
                     df2.replace('', float(0), inplace=True)
@@ -384,7 +422,7 @@ class TheApp:
             self.addMember()
 
     def addMember(self):
-        members_file = 'C:/Users/ALEX/Desktop/slef_help/members.csv'
+        members_file = os.environ["MEMBERS_FILE"]
         if self.add_member.ui.member_name.text() != "" and self.add_member.ui.member_nat_id.text() != "" and self.add_member.ui.member_number.text() != "" and self.add_member.ui.phone_number.text() != "" and self.add_member.ui.member_email.text() != "":
             with open(members_file, 'a') as file:
                 writer = csv.writer(file)
@@ -400,8 +438,8 @@ class TheApp:
 
     def displayMembers(self):
         try:
-            if os.path.exists("C:/Users/ALEX/Desktop/slef_help/members.csv"):
-                df = pd.read_csv('C:/Users/ALEX/Desktop/slef_help/members.csv',
+            if os.path.exists(os.environ["MEMBERS_FILE"]):
+                df = pd.read_csv(os.environ["MEMBERS_FILE"],
                                  names=["NAME", "NATIONAL ID", "MEMBER NUMBER", "PHONE NUMBER", "EMAIL"])
                 df = df.reset_index()
                 df = df.drop(['index'], axis=1)
@@ -446,7 +484,7 @@ class TheApp:
                                        QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if confirm == QMessageBox.Yes:
             try:
-                with open('C:/Users/ALEX/Desktop/slef_help/members.csv', 'r') as readFile:
+                with open(os.environ["MEMBERS_FILE"], 'r') as readFile:
                     reader = csv.reader(readFile)
                     x = 0
                     for row in reader:
@@ -455,7 +493,7 @@ class TheApp:
                             if row[1] == str(self.national_id) and row[4] == self.email:
                                 lines.remove(row)
                             x += 1
-                with open('C:/Users/ALEX/Desktop/slef_help/members.csv', 'w') as writeFile:
+                with open(os.environ["MEMBERS_FILE"], 'w') as writeFile:
                     writer = csv.writer(writeFile)
                     writer.writerows(lines)
             except Exception as e:
@@ -475,7 +513,7 @@ class TheApp:
 
     def runBackup(self):
         file_names_list = ["payment.csv", "members.csv"]
-        file_paths_list = ["C:/Users/ALEX/Desktop/slef_help/payment.csv", "C:/Users/ALEX/Desktop/slef_help/members.csv"]
+        file_paths_list = [os.environ["PAYMENTS_FILE"], os.environ["MEMBERS_FILE"]]
         for x in range(len(file_names_list)):
             self.backupFile(file_paths_list[x], file_names_list[x])
 
@@ -506,7 +544,7 @@ class TheApp:
 
     def newPayment(self):
         import datetime
-        pay_file = 'C:/Users/ALEX/Desktop/slef_help/payment.csv'
+        pay_file = os.environ["PAYMENTS_FILE"]
         date = None
         if self.new_payment.ui.date_today.isChecked():
             date = datetime.date.today().strftime("%d/%m/%Y")
@@ -526,7 +564,7 @@ class TheApp:
 
     def viewAllPayments(self):
         self.all_payments.show()
-        df = pd.read_csv('C:/Users/ALEX/Desktop/slef_help/payment.csv',
+        df = pd.read_csv(os.environ["PAYMENTS_FILE"],
                          names=["NAME", "NATIONAL ID", "DATE", "AMOUNT", "TRANSACTION CODE", "PAYMENT MODE"])
         df.dropna(inplace=True)
         df["NATIONAL ID"] = df["NATIONAL ID"].astype(int)

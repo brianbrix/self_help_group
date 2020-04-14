@@ -11,18 +11,21 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.platypus import *
 from reportlab.lib.enums import TA_LEFT
+
 try:
-    os.chmod("C:\Program Files\self_help_group\logos/toplogo.png", 0o777)
-    os.chmod("C:\Program Files\self_help_group\logos/bottomlogo.png", 0o777)
+    os.chmod(os.path.join(os.getcwd(), "logos/toplogo.png"), 0o777)
+    os.chmod(os.path.join(os.getcwd(), "logos/bottomlogo.png"), 0o777)
 except Exception as e:
     print(e)
+
+
 def render_statement(data, paragraphss, quarterly, fileName):
     doc = SimpleDocTemplate(fileName, pagesize=A4,
                             rightMargin=72, leftMargin=56,
                             topMargin=5, bottomMargin=18)
     Story = []
-    logo = "C:\Program Files\self_help_group\logos/toplogo.png"
-    logo2 = "C:\Program Files\self_help_group\logos/bottomlogo.png"
+    logo = os.path.join(os.getcwd(), "logos/toplogo.png")
+    logo2 = os.path.join(os.getcwd(), "logos/bottomlogo.png")
     im = Image(logo, 8 * inch, 3 * inch)
     im2 = Image(logo2, 7 * inch, 1 * inch)
     t_keep = KeepInFrame(0, 0, Story, mode='shrink', hAlign='CENTER', vAlign='MIDDLE')
