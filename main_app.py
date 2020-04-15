@@ -19,14 +19,15 @@ from PyQt5.QtWidgets import QApplication, QHeaderView, QTableView, QMessageBox, 
     QAbstractItemView, QFrame
 
 import PandasModel
-import all_payments
-import members_list
-import new_member
-import new_payment
-import print_statement
+from views import all_payments
+from views import members_list
+from views import new_member
+from views import new_payment
+from views import print_statement
+from views import homepage
 import statement
 import subprocess
-import homepage
+import views.homepage
 import pymysql as mdb
 
 operating_system = platform.system()
