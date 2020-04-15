@@ -52,24 +52,24 @@
            <enum>QFrame::Sunken</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout">
-           <item row="0" column="1">
-            <widget class="QComboBox" name="engine_select">
-             <item>
-              <property name="text">
-               <string>CSV Files</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>MySQL Database(Requires Pre-Installed MySQL Database)</string>
-              </property>
-             </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Select Storage Engine</string>
+             </property>
             </widget>
            </item>
-           <item row="1" column="1">
-            <widget class="QPushButton" name="csv_folder_select">
+           <item row="0" column="1">
+            <widget class="QRadioButton" name="csv_engine">
              <property name="text">
-              <string>Folder...</string>
+              <string>CSV FIle</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QRadioButton" name="database_eng">
+             <property name="text">
+              <string>MySQl Database</string>
              </property>
             </widget>
            </item>
@@ -80,10 +80,10 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label">
+           <item row="1" column="1">
+            <widget class="QPushButton" name="csv_folder_select">
              <property name="text">
-              <string>Select Storage Engine</string>
+              <string>Folder...</string>
              </property>
             </widget>
            </item>

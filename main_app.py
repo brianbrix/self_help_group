@@ -27,6 +27,7 @@ import print_statement
 import statement
 import subprocess
 import homepage
+import pymysql as mdb
 
 operating_system = platform.system()
 
@@ -106,11 +107,11 @@ class TheApp:
         self.all_payments = All_Payments()
         self.print_statement = PrintStatement()
         self.home_page = HomePage()
-        self.displayMembers()
         self.home_page.show()
         self.home_page.ui.stackedWidget.setCurrentIndex(0)
         self.home_page.ui.continue_to_app.clicked.connect(partial(self.home_page.ui.stackedWidget.setCurrentIndex, 1))
-        self.home_page.ui.engine_select.currentTextChanged.connect(self.selectDataEngine)
+        self.home_page.ui.csv_engine.clicked.connect(self.selectDataEngine)
+        self.home_page.ui.database_eng.clicked.connect(self.selectDataEngine)
         # self.model=PandasModel.PandasModel()
         self.home_page.ui.addMemberBtn.clicked.connect(self.memberDetails)
         self.home_page.ui.members_list.clicked.connect(self.tableHasBeenClicked)
@@ -136,6 +137,7 @@ class TheApp:
                             "October", "November", "December"]
         quarters = ["First Quarter", "Second Quarter", "Third Quarter", "Fourth Quarter"]
         years_back = 5
+        self.con = None
         year = datetime.datetime.today().year
         YEARS = [str(year - i) for i in range(years_back + 1)]
         self.print_statement.ui.select_month.addItems(months)
@@ -158,16 +160,32 @@ class TheApp:
             print(' return')
 
     def selectDataEngine(self):
-        if self.home_page.ui.engine_select.currentText() == "CSV Files":
+        if self.home_page.ui.csv_engine.isChecked():
             self.home_page.ui.label_3.setEnabled(True)
             self.home_page.ui.csv_folder_select.setEnabled(True)
-            self.selectCsvFilesFolder()
-        else:
+            confirm = QMessageBox.question(self.home_page, "Confirm Engine", "Continue with CSV Files",
+                                           QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if confirm == QMessageBox.Yes:
+                self.selectCsvFilesFolder()
+                os.environ["DATA_ENGINE"] = "CSV_ENGINE"
+                self.displayMembers()
+        if self.home_page.ui.database_eng.isChecked():
             self.home_page.ui.label_3.setEnabled(False)
             self.home_page.ui.csv_folder_select.setEnabled(False)
+            confirm = QMessageBox.question(self.home_page, "Confirm Engine", "Continue with MySQl Database",
+                                           QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if confirm == QMessageBox.Yes:
+                self.turnOnDb()
+                self.displayMembers()
 
     def turnOnDb(self):
-        print("DB")
+        try:
+            self.con = mdb.connect('localhost', 'root', '', 'self_help_group')
+            QMessageBox.about(self.home_page, 'Connection', 'Database Connected Successfully')
+            os.environ["DATA_ENGINE"] = "DATABASE_ENGINE"
+        except mdb.Error as e:
+            print(e)
+            QMessageBox.about(self.home_page, 'Connection', 'Failed To Connect Database')
 
     def selectCsvFilesFolder(self):
         folder = QFileDialog.getExistingDirectory(self.home_page, "Select Directory")
@@ -183,7 +201,6 @@ class TheApp:
             os.chmod(payments_file, 0o777)
             os.chmod(members_file, 0o777)
             self.home_page.ui.csv_folder_select.setText(str(folder))
-            self.displayMembers()
         except Exception as e:
             print(e)
 
@@ -438,23 +455,32 @@ class TheApp:
 
     def displayMembers(self):
         try:
-            if os.path.exists(os.environ["MEMBERS_FILE"]):
-                df = pd.read_csv(os.environ["MEMBERS_FILE"],
-                                 names=["NAME", "NATIONAL ID", "MEMBER NUMBER", "PHONE NUMBER", "EMAIL"])
-                df = df.reset_index()
-                df = df.drop(['index'], axis=1)
-                df.dropna(inplace=True)
-                df["NATIONAL ID"] = df["NATIONAL ID"].astype(int)
-                df["PHONE NUMBER"] = df["PHONE NUMBER"].astype(int)
-                self.model = PandasModel.PandasModel(df)
-                self.home_page.ui.members_list.setModel(self.model)
-                self.home_page.ui.members_list.horizontalHeader(
-                ).setSectionResizeMode(QHeaderView.Stretch)
-                # self.home_page.ui.members_list.resizeRowsToContents()
-                self.home_page.ui.members_list.setSelectionBehavior(
-                    QTableView.SelectRows)
-                self.home_page.ui.members_list.font().setPointSize(42)
-                self.home_page.ui.members_list.setSortingEnabled(True)
+            df = None
+            if os.environ["DATA_ENGINE"] == "DATABASE_ENGINE":
+                with self.con:
+                    cur = self.con.cursor()
+                    cur.execute("SELECT * FROM members")
+                    rows = list(list(x) for x in cur.fetchall())
+                df = pd.DataFrame(rows, columns=["NAME", "NATIONAL ID", "MEMBER NUMBER", "PHONE NUMBER", "EMAIL"])
+            else:
+                if os.path.exists(os.environ["MEMBERS_FILE"]):
+                    df = pd.read_csv(os.environ["MEMBERS_FILE"],
+                                     names=["NAME", "NATIONAL ID", "MEMBER NUMBER", "PHONE NUMBER", "EMAIL"])
+                    # df["NATIONAL ID"] = df["NATIONAL ID"].astype(int)
+                    # df["PHONE NUMBER"] = df["PHONE NUMBER"].astype(int)
+            df = df.reset_index()
+            df = df.drop(['index'], axis=1)
+            df.dropna(inplace=True)
+            self.model = PandasModel.PandasModel(df)
+            self.home_page.ui.members_list.setModel(self.model)
+            self.home_page.ui.members_list.horizontalHeader(
+            ).setSectionResizeMode(QHeaderView.Stretch)
+            # self.home_page.ui.members_list.resizeRowsToContents()
+            self.home_page.ui.members_list.setSelectionBehavior(
+                QTableView.SelectRows)
+            self.home_page.ui.members_list.font().setPointSize(42)
+            self.home_page.ui.members_list.setSortingEnabled(True)
+
         except Exception as e:
             print(e)
 
@@ -564,10 +590,20 @@ class TheApp:
 
     def viewAllPayments(self):
         self.all_payments.show()
-        df = pd.read_csv(os.environ["PAYMENTS_FILE"],
-                         names=["NAME", "NATIONAL ID", "DATE", "AMOUNT", "TRANSACTION CODE", "PAYMENT MODE"])
+        df = None
+        if os.environ["DATA_ENGINE"] == "DATABASE_ENGINE":
+            with self.con:
+                cur = self.con.cursor()
+                cur.execute("SELECT * FROM payment")
+                rows = list(list(x) for x in cur.fetchall())
+            df = pd.DataFrame(rows,
+                              columns=["NAME", "NATIONAL ID", "DATE", "AMOUNT", "TRANSACTION CODE", "PAYMENT MODE"])
+        else:
+            if os.path.exists(os.environ["MEMBERS_FILE"]):
+                df = pd.read_csv(os.environ["PAYMENTS_FILE"],
+                                 names=["NAME", "NATIONAL ID", "DATE", "AMOUNT", "TRANSACTION CODE", "PAYMENT MODE"])
         df.dropna(inplace=True)
-        df["NATIONAL ID"] = df["NATIONAL ID"].astype(int)
+        # df["NATIONAL ID"] = df["NATIONAL ID"].astype(int)
         df = df.reset_index()
 
         df = df.drop(['index'], axis=1)
