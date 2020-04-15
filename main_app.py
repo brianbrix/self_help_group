@@ -27,7 +27,6 @@ from views import print_statement
 from views import homepage
 import statement
 import subprocess
-import views.homepage
 import pymysql as mdb
 
 operating_system = platform.system()
