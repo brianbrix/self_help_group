@@ -2,14 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="27112ef1-4e1f-47e1-ba52-025f6240edfe" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/all_payments.py" beforeDir="false" afterPath="$PROJECT_DIR$/all_payments.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/all_payments.ui" beforeDir="false" afterPath="$PROJECT_DIR$/all_payments.ui" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main_app.py" beforeDir="false" afterPath="$PROJECT_DIR$/main_app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/members.csv" beforeDir="false" afterPath="$PROJECT_DIR$/members.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/payment.csv" beforeDir="false" afterPath="$PROJECT_DIR$/payment.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/statement.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/statement.pdf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/statement.py" beforeDir="false" afterPath="$PROJECT_DIR$/statement.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,7 +22,6 @@
   <component name="ProjectId" id="1XZAUjrxHrKNZVjOkpcGszDW6Xg" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
-    <option name="showExcludedFiles" value="true" />
     <option name="showLibraryContents" value="true" />
     <option name="showMembers" value="true" />
   </component>
@@ -202,6 +194,10 @@
       <screen x="1920" y="0" width="1920" height="1080" />
     </state>
     <state width="1899" height="332" key="GridCell.Tab.1.right/0.0.1920.1040/1920.0.1920.1080@1920.0.1920.1080" timestamp="1582725210870" />
+    <state x="836" y="374" width="237" height="284" key="MultipleFileMergeDialog" timestamp="1586993900889">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="836" y="374" width="237" height="284" key="MultipleFileMergeDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1586993900889" />
     <state x="2384" y="174" key="SettingsEditor" timestamp="1582269337544">
       <screen x="1920" y="0" width="1920" height="1080" />
     </state>
