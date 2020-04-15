@@ -439,19 +439,41 @@ class TheApp:
             self.addMember()
 
     def addMember(self):
-        members_file = os.environ["MEMBERS_FILE"]
         if self.add_member.ui.member_name.text() != "" and self.add_member.ui.member_nat_id.text() != "" and self.add_member.ui.member_number.text() != "" and self.add_member.ui.phone_number.text() != "" and self.add_member.ui.member_email.text() != "":
-            with open(members_file, 'a') as file:
-                writer = csv.writer(file)
-                writer.writerow([self.add_member.ui.member_name.text(), self.add_member.ui.member_nat_id.text(),
-                                 self.add_member.ui.member_number.text(), self.add_member.ui.phone_number.text(),
-                                 self.add_member.ui.member_email.text()])
+            if os.environ["DATA_ENGINE"] == "DATABASE_ENGINE":
+                try:
+                    cur = self.con.cursor()
+                    sql = """INSERT INTO payment(NAME, idNumber, meberId, phoneNo, memberEmail) VALUES(%s, %s, 
+                                   %s, %s, %s) """
+                    cur.execute(sql,(self.add_member.ui.member_name.text(), self.add_member.ui.member_nat_id.text(),
+                                         self.add_member.ui.member_number.text(), self.add_member.ui.phone_number.text(),
+                                         self.add_member.ui.member_email.text()))
+                    self.con.commit()
+                except Exception as e:
+                    QMessageBox.critical(self.add_member,  "Error", str(e),
+                                         QMessageBox.Ok)
+                else:
+                    QMessageBox.information(self.add_member, "Success", "The new member was added successfully",
+                                         QMessageBox.Ok)
+            else:
+                members_file = os.environ["MEMBERS_FILE"]
+                try:
+                    with open(members_file, 'a') as file:
+                        writer = csv.writer(file)
+                        writer.writerow([self.add_member.ui.member_name.text(), self.add_member.ui.member_nat_id.text(),
+                                         self.add_member.ui.member_number.text(), self.add_member.ui.phone_number.text(),
+                                         self.add_member.ui.member_email.text()])
+                except Exception as e:
+                    QMessageBox.critical(self.add_member, "Error", str(e),
+                                         QMessageBox.Ok)
+                else:
+                    QMessageBox.information(self.add_member, "Success", "The new member was added successfully",
+                                            QMessageBox.Ok)
         else:
-            QMessageBox.critical(self.new_payment, "Field Error", "All fields must be filled to continue",
+            QMessageBox.critical(self.add_member, "Field Error", "All fields must be filled to continue",
                                  QMessageBox.Ok)
             self.add_member.show()
         self.displayMembers()
-        # self.backupFile("C:/Users/ALEX/Desktop/slef_help/members.csv","members.csv")
 
     def displayMembers(self):
         try:
@@ -459,7 +481,7 @@ class TheApp:
             if os.environ["DATA_ENGINE"] == "DATABASE_ENGINE":
                 with self.con:
                     cur = self.con.cursor()
-                    cur.execute("SELECT * FROM members")
+                    cur.execute("SELECT NAME, idNumber, meberId, phoneNo,memberEmail FROM members")
                     rows = list(list(x) for x in cur.fetchall())
                 df = pd.DataFrame(rows, columns=["NAME", "NATIONAL ID", "MEMBER NUMBER", "PHONE NUMBER", "EMAIL"])
             else:
@@ -567,21 +589,52 @@ class TheApp:
 
         except Exception as e:
             print(e)
-
+    #     """
+    # reset table IDs
+    # SET @num := 0;
+    # UPDATE tablename SET id = @num := (@num+1);
+    # ALTER TABLE tablename AUTO_INCREMENT = 1;
+    #
+    # """
     def newPayment(self):
         import datetime
-        pay_file = os.environ["PAYMENTS_FILE"]
         date = None
         if self.new_payment.ui.date_today.isChecked():
             date = datetime.date.today().strftime("%d/%m/%Y")
         else:
             date = self.new_payment.ui.pay_date.date().toString("dd/MM/yyyy")
         if self.new_payment.ui.amount_paid.text() != "" and self.new_payment.ui.transaction_code.text() != "" and self.new_payment.ui.payment_mode.text() != "":
-            with open(pay_file, 'a') as file:
-                writer = csv.writer(file)
-                writer.writerow([self.name, self.national_id, date, self.new_payment.ui.amount_paid.text(),
-                                 self.new_payment.ui.transaction_code.text(), self.new_payment.ui.payment_mode.text()])
-            QMessageBox.information(self.new_payment, "Success", "The payment was successfully added", QMessageBox.Ok)
+            if os.environ["DATA_ENGINE"] == "DATABASE_ENGINE":
+                try:
+                    cur = self.con.cursor()
+                    sql = """INSERT INTO payment(NAME, idNumber, paymentDate, amount, transactionCode, mode) VALUES(%s, %s, 
+                    %s, %s, %s, %s) """
+                    cur.execute(sql,(self.name, self.national_id, date, self.new_payment.ui.amount_paid.text(),
+                                         self.new_payment.ui.transaction_code.text(),
+                                         self.new_payment.ui.payment_mode.text()))
+                    self.con.commit()
+                except Exception as e:
+                    QMessageBox.critical(self.new_payment, "Error", str(e),
+                                         QMessageBox.Ok)
+                else:
+                    QMessageBox.information(self.new_payment, "Success", "The payment was added successfully",
+                                            QMessageBox.Ok)
+
+            else:
+                pay_file = os.environ["PAYMENTS_FILE"]
+                try:
+                    with open(pay_file, 'a') as file:
+                        writer = csv.writer(file)
+                        writer.writerow([self.name, self.national_id, date, self.new_payment.ui.amount_paid.text(),
+                                         self.new_payment.ui.transaction_code.text(),
+                                         self.new_payment.ui.payment_mode.text()])
+                except Exception as e:
+                    QMessageBox.critical(self.new_payment, "Error", str(e),
+                                         QMessageBox.Ok)
+                else:
+                    QMessageBox.information(self.new_payment, "Success", "The payment was added successfully",
+                                            QMessageBox.Ok)
+
         else:
             QMessageBox.critical(self.new_payment, "Field Error", "All fields must be filled to continue",
                                  QMessageBox.Ok)
@@ -594,7 +647,7 @@ class TheApp:
         if os.environ["DATA_ENGINE"] == "DATABASE_ENGINE":
             with self.con:
                 cur = self.con.cursor()
-                cur.execute("SELECT * FROM payment")
+                cur.execute("SELECT NAME, idNumber, paymentDate,amount,transactionCode, mode FROM payment")
                 rows = list(list(x) for x in cur.fetchall())
             df = pd.DataFrame(rows,
                               columns=["NAME", "NATIONAL ID", "DATE", "AMOUNT", "TRANSACTION CODE", "PAYMENT MODE"])
