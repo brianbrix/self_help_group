@@ -66,7 +66,7 @@ class All_Members(QtWidgets.QMainWindow):
 
 class HomePage(QtWidgets.QMainWindow):
     def __init__(self):
-        QtWidgets.QWidget.__init__(self, None, QtCore.Qt.WindowStaysOnTopHint)
+        QtWidgets.QWidget.__init__(self, None)
         self.ui = homepage.Ui_HomePage()
         self.ui.setupUi(self)
 
@@ -218,19 +218,36 @@ class TheApp:
                                        "Are you sure you want to delete transaction " + t_code + " of Ksh " + amount + " for " + name + "?",
                                        QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if confirm == QMessageBox.Yes:
-            try:
-                with open(os.environ["PAYMENTS_FILE"], 'r') as readFile:
-                    reader = csv.reader(readFile)
-                    for row in reader:
-                        if len(row) > 2:
-                            lines.append(row)
-                            if row[0] == name and row[4] == t_code:
-                                lines.remove(row)
-                with open(os.environ["PAYMENTS_FILE"], 'w') as writeFile:
-                    writer = csv.writer(writeFile)
-                    writer.writerows(lines)
-            except Exception as e:
-                print(e)
+            if os.environ["DATA_ENGINE"] == "DATABASE_ENGINE":
+                try:
+                    cur = self.con.cursor()
+                    sql = """DELETE FROM payment WHERE NAME=%s AND transactionCode=%s"""
+                    cur.execute(sql,(name,t_code))
+                    self.con.commit()
+                except Exception as e:
+                    QMessageBox.critical(self.home_page, "Error", str(e),
+                                         QMessageBox.Ok)
+                else:
+                    QMessageBox.information(self.home_page, "Success", "The payment was deleted successfully",
+                                            QMessageBox.Ok)
+            else:
+                try:
+                    with open(os.environ["PAYMENTS_FILE"], 'r') as readFile:
+                        reader = csv.reader(readFile)
+                        for row in reader:
+                            if len(row) > 2:
+                                lines.append(row)
+                                if row[0] == name and row[4] == t_code:
+                                    lines.remove(row)
+                    with open(os.environ["PAYMENTS_FILE"], 'w') as writeFile:
+                        writer = csv.writer(writeFile)
+                        writer.writerows(lines)
+                except Exception as e:
+                    QMessageBox.critical(self.home_page, "Error", str(e),
+                                             QMessageBox.Ok)
+                else:
+                    QMessageBox.information(self.home_page, "Success", "The payment was deleted successfully",
+                                            QMessageBox.Ok)
         self.viewAllPayments()
         self.all_payments.ui.delete_selected_button.setEnabled(False)
         # self.backupFile("C:/Users/ALEX/Desktop/slef_help/payment.csv","payment.csv")
@@ -443,7 +460,7 @@ class TheApp:
             if os.environ["DATA_ENGINE"] == "DATABASE_ENGINE":
                 try:
                     cur = self.con.cursor()
-                    sql = """INSERT INTO payment(NAME, idNumber, meberId, phoneNo, memberEmail) VALUES(%s, %s, 
+                    sql = """INSERT INTO members(NAME, idNumber, meberId, phoneNo, memberEmail) VALUES(%s, %s, 
                                    %s, %s, %s) """
                     cur.execute(sql,(self.add_member.ui.member_name.text(), self.add_member.ui.member_nat_id.text(),
                                          self.add_member.ui.member_number.text(), self.add_member.ui.phone_number.text(),
@@ -527,25 +544,42 @@ class TheApp:
 
     def deleteMember(self):
         lines = list()
-        confirm = QMessageBox.question(self.all_members, "Confirm delete",
+        confirm = QMessageBox.question(self.home_page, "Confirm delete",
                                        "Are you sure you want to delete: " + self.name + ": " + self.national_id + "?",
                                        QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if confirm == QMessageBox.Yes:
-            try:
-                with open(os.environ["MEMBERS_FILE"], 'r') as readFile:
-                    reader = csv.reader(readFile)
-                    x = 0
-                    for row in reader:
-                        if len(row) > 2:
-                            lines.append(row)
-                            if row[1] == str(self.national_id) and row[4] == self.email:
-                                lines.remove(row)
-                            x += 1
-                with open(os.environ["MEMBERS_FILE"], 'w') as writeFile:
-                    writer = csv.writer(writeFile)
-                    writer.writerows(lines)
-            except Exception as e:
-                print(e)
+            if os.environ["DATA_ENGINE"] == "DATABASE_ENGINE":
+                try:
+                    cur = self.con.cursor()
+                    sql = """DELETE FROM members WHERE idNumber=%s AND memberEmail=%s"""
+                    cur.execute(sql,(self.national_id,self.email))
+                    self.con.commit()
+                except Exception as e:
+                    QMessageBox.critical(self.home_page, "Error", str(e),
+                                         QMessageBox.Ok)
+                else:
+                    QMessageBox.information(self.home_page, "Success", "The user was deleted successfully",
+                                            QMessageBox.Ok)
+            else:
+                try:
+                    with open(os.environ["MEMBERS_FILE"], 'r') as readFile:
+                        reader = csv.reader(readFile)
+                        x = 0
+                        for row in reader:
+                            if len(row) > 2:
+                                lines.append(row)
+                                if row[1] == str(self.national_id) and row[4] == self.email:
+                                    lines.remove(row)
+                                x += 1
+                    with open(os.environ["MEMBERS_FILE"], 'w') as writeFile:
+                        writer = csv.writer(writeFile)
+                        writer.writerows(lines)
+                except Exception as e:
+                    QMessageBox.critical(self.home_page, "Error", str(e),
+                                         QMessageBox.Ok)
+                else:
+                    QMessageBox.information(self.home_page, "Success", "The user was deleted successfully",
+                                            QMessageBox.Ok)
         self.displayMembers()
         # self.backupFile("C:/Users/ALEX/Desktop/slef_help/members.csv","members.csv")
 
