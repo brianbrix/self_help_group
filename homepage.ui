@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>HomePage</class>
+ <widget class="QMainWindow" name="HomePage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>925</width>
+    <height>736</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Home Page</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="0" column="0">
+     <widget class="QStackedWidget" name="stackedWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="page">
+       <layout class="QGridLayout" name="gridLayout_3">
+        <item row="0" column="0" colspan="3">
+         <widget class="QLabel" name="label_2">
+          <property name="font">
+           <font>
+            <family>Tlwg Typist</family>
+            <pointsize>48</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>SACCO YOURS LEDGER</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" colspan="3">
+         <widget class="QFrame" name="frame">
+          <property name="autoFillBackground">
+           <bool>true</bool>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Sunken</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Select Storage Engine</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QRadioButton" name="csv_engine">
+             <property name="text">
+              <string>CSV FIle</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QRadioButton" name="database_eng">
+             <property name="text">
+              <string>MySQl Database</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_3">
+             <property name="text">
+              <string>Select CSV Folder</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QPushButton" name="csv_folder_select">
+             <property name="text">
+              <string>Folder...</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Preferred</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>166</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="3" column="0">
+         <widget class="QPushButton" name="settings_button">
+          <property name="minimumSize">
+           <size>
+            <width>160</width>
+            <height>131</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>131</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Settings</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QPushButton" name="continue_to_app">
+          <property name="minimumSize">
+           <size>
+            <width>160</width>
+            <height>131</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>131</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Continue To App</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="2">
+         <widget class="QPushButton" name="pushButton_3">
+          <property name="minimumSize">
+           <size>
+            <width>160</width>
+            <height>131</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>131</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>PushButton</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_2">
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
+         <widget class="QPushButton" name="addMemberBtn">
+          <property name="text">
+           <string>Add People</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QPushButton" name="remove_member_btn">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Remove Selected</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" colspan="2">
+         <widget class="QTableView" name="members_list">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QPushButton" name="add_payment_btn">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Add Payment for selected</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QPushButton" name="statement_btn">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Download Statement for selected</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0" colspan="2">
+         <widget class="QPushButton" name="view_all_payments">
+          <property name="text">
+           <string>View All Payments</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0" colspan="2">
+         <widget class="QPushButton" name="run_backup">
+          <property name="text">
+           <string>Backup</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>925</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
