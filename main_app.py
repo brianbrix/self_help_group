@@ -1,10 +1,13 @@
 import csv
 import datetime
-import os, platform
+import os
+import platform
+import sys
+import time
 from functools import partial
-from importlib import reload
+from multiprocessing import Pool
 
-from PyQt5.QtCore import QTimer, QDateTime
+from PyQt5.QtCore import pyqtSlot, QEventLoop
 
 try:
     from pydrive.auth import GoogleAuth
@@ -13,11 +16,10 @@ except Exception as e:
     print(e)
 
 import pandas as pd
-import numpy as np
 from PyQt5 import QtWidgets, QtCore, Qt
-from PyQt5.QtGui import QKeySequence
-from PyQt5.QtWidgets import QApplication, QHeaderView, QTableView, QMessageBox, QFileDialog, QShortcut, \
-    QAbstractItemView, QFrame
+from PyQt5.QtGui import QKeySequence, QMovie, QPixmap
+from PyQt5.QtWidgets import QApplication, QHeaderView, QTableView, QMessageBox, QFileDialog, QShortcut, QSplashScreen, \
+    QDesktopWidget
 
 import PandasModel
 from views import all_payments
@@ -46,6 +48,30 @@ def ping(target):
 # except Exception as e:
 #     print(e)
 
+class MySplashScreen(QSplashScreen):
+    def __init__(self, animation, flags):
+        # run event dispatching in another thread
+        QSplashScreen.__init__(self, QPixmap(), flags)
+        qtRectangle = self.frameGeometry()
+        centerPoint = QDesktopWidget().availableGeometry().center()
+        qtRectangle.moveCenter(centerPoint)
+        self.move(qtRectangle.topLeft())
+        self.movie = QMovie(animation)
+        self.movie.frameChanged.connect(self.onNextFrame)
+        self.movie.start()
+
+    @pyqtSlot()
+    def onNextFrame(self):
+        pixmap = self.movie.currentPixmap()
+        self.setPixmap(pixmap)
+        self.setMask(pixmap.mask())
+
+
+# Put your initialization code here
+def longInitialization(arg):
+    time.sleep(arg)
+    return 0
+
 
 class All_Members(QtWidgets.QMainWindow):
     def __init__(self):
@@ -69,6 +95,10 @@ class HomePage(QtWidgets.QMainWindow):
     def __init__(self):
         QtWidgets.QWidget.__init__(self, None)
         self.ui = homepage.Ui_HomePage()
+        qtRectangle = self.frameGeometry()
+        centerPoint = QDesktopWidget().availableGeometry().center()
+        qtRectangle.moveCenter(centerPoint)
+        self.move(qtRectangle.topLeft())
         self.ui.setupUi(self)
 
 
@@ -90,6 +120,10 @@ class All_Payments(QtWidgets.QFrame):
     def __init__(self):
         QtWidgets.QWidget.__init__(self, None, QtCore.Qt.WindowStaysOnTopHint)
         self.ui = all_payments.Ui_Frame()
+        qtRectangle = self.frameGeometry()
+        centerPoint = QDesktopWidget().availableGeometry().center()
+        qtRectangle.moveCenter(centerPoint)
+        self.move(qtRectangle.topLeft())
         self.ui.setupUi(self)
 
 
@@ -100,15 +134,16 @@ class PrintStatement(QtWidgets.QDialog):
         self.ui.setupUi(self)
 
 
-class TheApp:
-    def __init__(self):
+class TheApp(QtWidgets.QWidget):
+    def __init__(self, parent=None):
+        super(TheApp, self).__init__(parent)
         self.all_members = All_Members()
         self.add_member = Add_Member()
         self.new_payment = New_Payment()
         self.all_payments = All_Payments()
         self.print_statement = PrintStatement()
         self.home_page = HomePage()
-        self.home_page.show()
+        # self.home_page.show()
         self.home_page.ui.stackedWidget.setCurrentIndex(0)
         self.home_page.ui.continue_to_app.clicked.connect(partial(self.home_page.ui.stackedWidget.setCurrentIndex, 1))
         self.home_page.ui.csv_engine.clicked.connect(self.selectDataEngine)
@@ -217,7 +252,7 @@ class TheApp:
                 try:
                     cur = self.con.cursor()
                     sql = """DELETE FROM payment WHERE NAME=%s AND transactionCode=%s"""
-                    cur.execute(sql,(name,t_code))
+                    cur.execute(sql, (name, t_code))
                     self.con.commit()
                 except Exception as e:
                     QMessageBox.critical(self.all_payments, "Error", str(e),
@@ -239,7 +274,7 @@ class TheApp:
                         writer.writerows(lines)
                 except Exception as e:
                     QMessageBox.critical(self.all_payments, "Error", str(e),
-                                             QMessageBox.Ok)
+                                         QMessageBox.Ok)
                 else:
                     QMessageBox.information(self.all_payments, "Success", "The payment was deleted successfully",
                                             QMessageBox.Ok)
@@ -276,7 +311,8 @@ class TheApp:
                                                "PAYMENT MODE"])
                 else:
                     df = pd.read_csv(os.environ["PAYMENTS_FILE"],
-                                     names=["NAME", "NATIONAL ID", "DATE", "AMOUNT", "TRANSACTION CODE", "PAYMENT MODE"])
+                                     names=["NAME", "NATIONAL ID", "DATE", "AMOUNT", "TRANSACTION CODE",
+                                            "PAYMENT MODE"])
                 df = df[df["NAME"] == self.name]
                 df = df[df["NATIONAL ID"].astype(int) == int(self.national_id)]
                 df = df.drop(columns=['NAME', 'NATIONAL ID'])
@@ -345,17 +381,17 @@ class TheApp:
                             if "," in str(row["AMOUNT"]):
                                 row["AMOUNT"] = str(row["AMOUNT"]).replace(",", "")
                             if year in str(row['DATE']):
-                                 if int(str(row["DATE"]).split("/")[1]) == 4:
+                                if int(str(row["DATE"]).split("/")[1]) == 4:
                                     first_monthly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "April":
                                             x["Amount"] = str(first_monthly_sum)
-                                 if int(str(row["DATE"]).split("/")[1]) == 5:
+                                if int(str(row["DATE"]).split("/")[1]) == 5:
                                     second_monthly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "May":
                                             x["Amount"] = str(second_monthly_sum)
-                                 if int(str(row["DATE"]).split("/")[1]) == 6:
+                                if int(str(row["DATE"]).split("/")[1]) == 6:
                                     third_mothly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "June":
@@ -371,17 +407,17 @@ class TheApp:
                             if "," in str(row["AMOUNT"]):
                                 row["AMOUNT"] = str(row["AMOUNT"]).replace(",", "")
                             if year in str(row['DATE']):
-                                 if int(str(row["DATE"]).split("/")[1]) == 7:
+                                if int(str(row["DATE"]).split("/")[1]) == 7:
                                     first_monthly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "July":
                                             x["Amount"] = str(first_monthly_sum)
-                                 if int(str(row["DATE"]).split("/")[1]) == 8:
+                                if int(str(row["DATE"]).split("/")[1]) == 8:
                                     second_monthly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "August":
                                             x["Amount"] = str(second_monthly_sum)
-                                 if int(str(row["DATE"]).split("/")[1]) == 9:
+                                if int(str(row["DATE"]).split("/")[1]) == 9:
                                     third_mothly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "September":
@@ -397,17 +433,17 @@ class TheApp:
                             if "," in str(row["AMOUNT"]):
                                 row["AMOUNT"] = str(row["AMOUNT"]).replace(",", "")
                             if year in str(row['DATE']):
-                                 if int(str(row["DATE"]).split("/")[1]) == 10:
+                                if int(str(row["DATE"]).split("/")[1]) == 10:
                                     first_monthly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "October":
                                             x["Amount"] = str(first_monthly_sum)
-                                 if int(str(row["DATE"]).split("/")[1]) == 11:
+                                if int(str(row["DATE"]).split("/")[1]) == 11:
                                     second_monthly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "November":
                                             x["Amount"] = str(second_monthly_sum)
-                                 if int(str(row["DATE"]).split("/")[1]) == 12:
+                                if int(str(row["DATE"]).split("/")[1]) == 12:
                                     third_mothly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "December":
@@ -463,23 +499,24 @@ class TheApp:
                     cur = self.con.cursor()
                     sql = """INSERT INTO members(NAME, idNumber, meberId, phoneNo, memberEmail) VALUES(%s, %s, 
                                    %s, %s, %s) """
-                    cur.execute(sql,(self.add_member.ui.member_name.text(), self.add_member.ui.member_nat_id.text(),
-                                         self.add_member.ui.member_number.text(), self.add_member.ui.phone_number.text(),
-                                         self.add_member.ui.member_email.text()))
+                    cur.execute(sql, (self.add_member.ui.member_name.text(), self.add_member.ui.member_nat_id.text(),
+                                      self.add_member.ui.member_number.text(), self.add_member.ui.phone_number.text(),
+                                      self.add_member.ui.member_email.text()))
                     self.con.commit()
                 except Exception as e:
-                    QMessageBox.critical(self.add_member,  "Error", str(e),
+                    QMessageBox.critical(self.add_member, "Error", str(e),
                                          QMessageBox.Ok)
                 else:
                     QMessageBox.information(self.add_member, "Success", "The new member was added successfully",
-                                         QMessageBox.Ok)
+                                            QMessageBox.Ok)
             else:
                 members_file = os.environ["MEMBERS_FILE"]
                 try:
                     with open(members_file, 'a') as file:
                         writer = csv.writer(file)
                         writer.writerow([self.add_member.ui.member_name.text(), self.add_member.ui.member_nat_id.text(),
-                                         self.add_member.ui.member_number.text(), self.add_member.ui.phone_number.text(),
+                                         self.add_member.ui.member_number.text(),
+                                         self.add_member.ui.phone_number.text(),
                                          self.add_member.ui.member_email.text()])
                 except Exception as e:
                     QMessageBox.critical(self.add_member, "Error", str(e),
@@ -550,7 +587,7 @@ class TheApp:
                 try:
                     cur = self.con.cursor()
                     sql = """DELETE FROM members WHERE idNumber=%s AND memberEmail=%s"""
-                    cur.execute(sql,(self.national_id,self.email))
+                    cur.execute(sql, (self.national_id, self.email))
                     self.con.commit()
                 except Exception as e:
                     QMessageBox.critical(self.home_page, "Error", str(e),
@@ -621,6 +658,7 @@ class TheApp:
 
         except Exception as e:
             print(e)
+
     #     """
     # reset table IDs
     # SET @num := 0;
@@ -641,9 +679,9 @@ class TheApp:
                     cur = self.con.cursor()
                     sql = """INSERT INTO payment(NAME, idNumber, paymentDate, amount, transactionCode, mode) VALUES(%s, %s, 
                     %s, %s, %s, %s) """
-                    cur.execute(sql,(self.name, self.national_id, date, self.new_payment.ui.amount_paid.text(),
-                                         self.new_payment.ui.transaction_code.text(),
-                                         self.new_payment.ui.payment_mode.text()))
+                    cur.execute(sql, (self.name, self.national_id, date, self.new_payment.ui.amount_paid.text(),
+                                      self.new_payment.ui.transaction_code.text(),
+                                      self.new_payment.ui.payment_mode.text()))
                     self.con.commit()
                 except Exception as e:
                     QMessageBox.critical(self.new_payment, "Error", str(e),
@@ -702,7 +740,25 @@ class TheApp:
         self.all_payments.ui.all_payments_view.font().setPointSize(42);
         self.all_payments.ui.all_payments_view.setSortingEnabled(True)
 
-app = QApplication([])
-a = TheApp()
-app.exec_()
 
+if __name__ == "__main__":
+    import sys, time
+
+    app = QApplication(sys.argv)
+
+    splash = MySplashScreen("images/giphy2.gif", Qt.Qt.WindowStaysOnTopHint)
+    #   splash.setMask(splash_pix.mask())
+    # splash.raise_()
+    splash.show()
+    app.processEvents()
+
+    # this event loop is needed for dispatching of Qt events
+    initLoop = QEventLoop()
+    pool = Pool(processes=1)
+    pool.apply_async(longInitialization, [4], callback=lambda exitCode: initLoop.exit(exitCode))
+    initLoop.exec_()
+
+    a = TheApp()
+    a.home_page.show()
+    splash.finish(a)
+    app.exec_()
