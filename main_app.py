@@ -2,6 +2,7 @@ import csv
 import datetime
 import os, platform
 from functools import partial
+from importlib import reload
 
 from PyQt5.QtCore import QTimer, QDateTime
 
@@ -147,12 +148,6 @@ class TheApp:
         self.national_id = ""
         self.email = ""
         self.paragraph = {}
-        # for child in self.home_page.ui.frame.children():
-        #     if child.objectName() == "turn_db_on":
-        #         child.clicked.connect(self.turnOnDb)
-        # for child in self.home_page.ui.frame.children():
-        #     if child.objectName() == "csv_folder_select":
-        #         child.clicked.connect(self.selectCsvFilesFolder)
 
     def keyPressEvent(self, e):
         print("event", e)
@@ -225,10 +220,10 @@ class TheApp:
                     cur.execute(sql,(name,t_code))
                     self.con.commit()
                 except Exception as e:
-                    QMessageBox.critical(self.home_page, "Error", str(e),
+                    QMessageBox.critical(self.all_payments, "Error", str(e),
                                          QMessageBox.Ok)
                 else:
-                    QMessageBox.information(self.home_page, "Success", "The payment was deleted successfully",
+                    QMessageBox.information(self.all_payments, "Success", "The payment was deleted successfully",
                                             QMessageBox.Ok)
             else:
                 try:
@@ -243,10 +238,10 @@ class TheApp:
                         writer = csv.writer(writeFile)
                         writer.writerows(lines)
                 except Exception as e:
-                    QMessageBox.critical(self.home_page, "Error", str(e),
+                    QMessageBox.critical(self.all_payments, "Error", str(e),
                                              QMessageBox.Ok)
                 else:
-                    QMessageBox.information(self.home_page, "Success", "The payment was deleted successfully",
+                    QMessageBox.information(self.all_payments, "Success", "The payment was deleted successfully",
                                             QMessageBox.Ok)
         self.viewAllPayments()
         self.all_payments.ui.delete_selected_button.setEnabled(False)
@@ -271,11 +266,19 @@ class TheApp:
             fileName, _ = QFileDialog.getSaveFileName(
                 self.all_members, 'Save as... File', temp_path, filter='PDF Files(*.pdf)')
             if fileName:
-                df = pd.read_csv(os.environ["PAYMENTS_FILE"],
-                                 names=["NAME", "NATIONAL ID", "DATE", "AMOUNT", "TRANSACTION CODE", "PAYMENT MODE"])
+                if os.environ["DATA_ENGINE"] == "DATABASE_ENGINE":
+                    with self.con:
+                        cur = self.con.cursor()
+                        cur.execute("SELECT NAME, idNumber, paymentDate,amount,transactionCode, mode FROM payment")
+                        rows = list(list(x) for x in cur.fetchall())
+                    df = pd.DataFrame(rows,
+                                      columns=["NAME", "NATIONAL ID", "DATE", "AMOUNT", "TRANSACTION CODE",
+                                               "PAYMENT MODE"])
+                else:
+                    df = pd.read_csv(os.environ["PAYMENTS_FILE"],
+                                     names=["NAME", "NATIONAL ID", "DATE", "AMOUNT", "TRANSACTION CODE", "PAYMENT MODE"])
                 df = df[df["NAME"] == self.name]
-
-                df = df[df["NATIONAL ID"] == int(self.national_id)]
+                df = df[df["NATIONAL ID"].astype(int) == int(self.national_id)]
                 df = df.drop(columns=['NAME', 'NATIONAL ID'])
                 df2 = pd.DataFrame(columns=df.columns)
                 year = str(self.print_statement.ui.select_year.currentText())
@@ -284,9 +287,9 @@ class TheApp:
                 if self.print_statement.ui.monthly.isChecked():
                     for index, row in df.iterrows():
                         if month + "/" + year in str(row['DATE']):
+                            if "," in str(row["AMOUNT"]):
+                                row["AMOUNT"] = str(row["AMOUNT"]).replace(",", "")
                             df2 = df2.append(row, ignore_index=True)
-                    if "," in df2["AMOUNT"]:
-                        df2["AMOUNT"] = df2["AMOUNT"].str.replace(",", "")
                     totals = ["TOTAL", df2["AMOUNT"].apply(pd.to_numeric).sum(), "", ""]
                     a_series = pd.Series(totals, index=df2.columns)
                     df2 = df2.append(a_series, ignore_index=True)
@@ -296,9 +299,9 @@ class TheApp:
                 elif self.print_statement.ui.yearly.isChecked():
                     for index, row in df.iterrows():
                         if year in str(row['DATE']):
+                            if "," in str(row["AMOUNT"]):
+                                row["AMOUNT"] = str(row["AMOUNT"]).replace(",", "")
                             df2 = df2.append(row, ignore_index=True)
-                    if "," in df2["AMOUNT"]:
-                        df2["AMOUNT"] = df2["AMOUNT"].str.replace(",", "")
                     totals = ["TOTAL", df2["AMOUNT"].apply(pd.to_numeric).sum(), "", ""]
                     a_series = pd.Series(totals, index=df2.columns)
                     df2 = df2.append(a_series, ignore_index=True)
@@ -316,7 +319,7 @@ class TheApp:
                         third_mothly_sum = 0
                         for index, row in df.iterrows():
                             if "," in str(row["AMOUNT"]):
-                                row["AMOUNT"] = row["AMOUNT"].str.replace(",", "")
+                                row["AMOUNT"] = str(row["AMOUNT"]).replace(",", "")
                             if year in str(row['DATE']):
                                 if "01" in str(row["DATE"]).split("/")[1]:
                                     first_monthly_sum += float(row["AMOUNT"])
@@ -342,7 +345,7 @@ class TheApp:
                         third_mothly_sum = 0
                         for index, row in df.iterrows():
                             if "," in str(row["AMOUNT"]):
-                                row["AMOUNT"] = row["AMOUNT"].str.replace(",", "")
+                                row["AMOUNT"] = str(row["AMOUNT"]).replace(",", "")
                             if year in str(row['DATE']):
                                 if "04" in str(row["DATE"]).split("/")[1]:
                                     first_monthly_sum += float(row["AMOUNT"])
@@ -368,7 +371,7 @@ class TheApp:
                         third_mothly_sum = 0
                         for index, row in df.iterrows():
                             if "," in str(row["AMOUNT"]):
-                                row["AMOUNT"] = row["AMOUNT"].str.replace(",", "")
+                                row["AMOUNT"] = str(row["AMOUNT"]).replace(",", "")
                             if year in str(row['DATE']):
                                 if "07" in str(row["DATE"]).split("/")[1]:
                                     first_monthly_sum += float(row["AMOUNT"])
@@ -394,7 +397,7 @@ class TheApp:
                         third_mothly_sum = 0
                         for index, row in df.iterrows():
                             if "," in str(row["AMOUNT"]):
-                                row["AMOUNT"] = row["AMOUNT"].str.replace(",", "")
+                                row["AMOUNT"] = str(row["AMOUNT"]).replace(",", "")
                             if year in str(row['DATE']):
                                 if "10" in str(row["DATE"]).split("/")[1]:
                                     first_monthly_sum += float(row["AMOUNT"])
@@ -414,8 +417,8 @@ class TheApp:
 
                     df2 = pd.DataFrame.from_records(monthly)
                     df2.columns = map(str.upper, df2.columns)
-                    if "," in df2["AMOUNT"]:
-                        df2["AMOUNT"] = df2["AMOUNT"].str.replace(",", "")
+                    # if "," in df2["AMOUNT"]:
+                    #     df2["AMOUNT"] = df2["AMOUNT"].str.replace(",", "")
                     totals = ["TOTAL QUARTERLY", df2["AMOUNT"].apply(pd.to_numeric).sum()]
                     a_series = pd.Series(totals, index=df2.columns)
                     df2 = df2.append(a_series, ignore_index=True)
@@ -505,8 +508,6 @@ class TheApp:
                 if os.path.exists(os.environ["MEMBERS_FILE"]):
                     df = pd.read_csv(os.environ["MEMBERS_FILE"],
                                      names=["NAME", "NATIONAL ID", "MEMBER NUMBER", "PHONE NUMBER", "EMAIL"])
-                    # df["NATIONAL ID"] = df["NATIONAL ID"].astype(int)
-                    # df["PHONE NUMBER"] = df["PHONE NUMBER"].astype(int)
             df = df.reset_index()
             df = df.drop(['index'], axis=1)
             df.dropna(inplace=True)
@@ -514,7 +515,6 @@ class TheApp:
             self.home_page.ui.members_list.setModel(self.model)
             self.home_page.ui.members_list.horizontalHeader(
             ).setSectionResizeMode(QHeaderView.Stretch)
-            # self.home_page.ui.members_list.resizeRowsToContents()
             self.home_page.ui.members_list.setSelectionBehavior(
                 QTableView.SelectRows)
             self.home_page.ui.members_list.font().setPointSize(42)
@@ -708,3 +708,4 @@ class TheApp:
 app = QApplication([])
 a = TheApp()
 app.exec_()
+
