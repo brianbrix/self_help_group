@@ -4,8 +4,6 @@
     <list default="true" id="27112ef1-4e1f-47e1-ba52-025f6240edfe" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main_app.py" beforeDir="false" afterPath="$PROJECT_DIR$/main_app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/members.csv" beforeDir="false" afterPath="$PROJECT_DIR$/members.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/payment.csv" beforeDir="false" afterPath="$PROJECT_DIR$/payment.csv" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -121,6 +119,17 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration default="true" type="Tox" factoryName="Tox">
+      <module name="alex_app" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <method v="2" />
+    </configuration>
     <configuration default="true" type="tests" factoryName="Doctests">
       <module name="alex_app" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -183,26 +192,26 @@
       <screen x="1920" y="0" width="1920" height="1080" />
     </state>
     <state x="2663" y="297" width="424" height="479" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1080@1920.0.1920.1080" timestamp="1582517215757" />
-    <state width="1898" height="159" key="GridCell.Tab.0.bottom" timestamp="1587027321521">
+    <state width="1898" height="159" key="GridCell.Tab.0.bottom" timestamp="1587028140643">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1899" height="264" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1080@1920.0.1920.1080" timestamp="1582727025235" />
-    <state width="1898" height="159" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1587027321521" />
-    <state width="1898" height="159" key="GridCell.Tab.0.center" timestamp="1587027321521">
+    <state width="1898" height="159" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1587028140643" />
+    <state width="1898" height="159" key="GridCell.Tab.0.center" timestamp="1587028140643">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1899" height="264" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1080@1920.0.1920.1080" timestamp="1582727025235" />
-    <state width="1898" height="159" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1587027321521" />
-    <state width="1898" height="159" key="GridCell.Tab.0.left" timestamp="1587027321520">
+    <state width="1898" height="159" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1587028140643" />
+    <state width="1898" height="159" key="GridCell.Tab.0.left" timestamp="1587028140643">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1899" height="264" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1080@1920.0.1920.1080" timestamp="1582727025235" />
-    <state width="1898" height="159" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1587027321520" />
-    <state width="1898" height="159" key="GridCell.Tab.0.right" timestamp="1587027321521">
+    <state width="1898" height="159" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1587028140643" />
+    <state width="1898" height="159" key="GridCell.Tab.0.right" timestamp="1587028140643">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1899" height="264" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1080@1920.0.1920.1080" timestamp="1582727025235" />
-    <state width="1898" height="159" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1587027321521" />
+    <state width="1898" height="159" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1587028140643" />
     <state width="1898" height="328" key="GridCell.Tab.1.bottom" timestamp="1587027318280">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -231,10 +240,10 @@
       <screen x="1920" y="0" width="1920" height="1080" />
     </state>
     <state x="2384" y="174" key="SettingsEditor/0.0.1920.1040/1920.0.1920.1080@1920.0.1920.1080" timestamp="1582269337544" />
-    <state x="613" y="136" width="683" height="760" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1587027294802">
+    <state x="613" y="136" width="683" height="760" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1587028139228">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="613" y="136" width="683" height="760" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.1920.1040@0.0.1920.1040" timestamp="1587027294802" />
+    <state x="613" y="136" width="683" height="760" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.1920.1040@0.0.1920.1040" timestamp="1587028139228" />
     <state x="709" y="299" width="501" height="434" key="git4idea.merge.GitMergeDialog" timestamp="1586994779746">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>

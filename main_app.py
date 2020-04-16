@@ -294,7 +294,6 @@ class TheApp:
                     a_series = pd.Series(totals, index=df2.columns)
                     df2 = df2.append(a_series, ignore_index=True)
                     df2 = df2.rename(columns={"AMOUNT": "AMOUNT(KSHs)"})
-                    # df2["AMOUNT"]= df2["AMOUNT"].apply(self.format)
                     self.paragraph["Period"] = self.month_names[int(month) - 1] + " " + year
                 elif self.print_statement.ui.yearly.isChecked():
                     for index, row in df.iterrows():
@@ -306,7 +305,6 @@ class TheApp:
                     a_series = pd.Series(totals, index=df2.columns)
                     df2 = df2.append(a_series, ignore_index=True)
                     df2 = df2.rename(columns={"AMOUNT": "AMOUNT(KSHs)"})
-                    # df2["AMOUNT"]= df2["AMOUNT"].apply(self.format)
                     self.paragraph["Period"] = "Year " + year
                 elif self.print_statement.ui.quaterly.isChecked():
                     monthly = []
@@ -321,17 +319,17 @@ class TheApp:
                             if "," in str(row["AMOUNT"]):
                                 row["AMOUNT"] = str(row["AMOUNT"]).replace(",", "")
                             if year in str(row['DATE']):
-                                if "01" in str(row["DATE"]).split("/")[1]:
+                                if int(str(row["DATE"]).split("/")[1]) == 1:
                                     first_monthly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "January":
                                             x["Amount"] = str(first_monthly_sum)
-                                if "02" in str(row["DATE"]).split("/")[1]:
+                                if int(str(row["DATE"]).split("/")[1]) == 2:
                                     second_monthly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "February":
                                             x["Amount"] = str(second_monthly_sum)
-                                if "03" in str(row["DATE"]).split("/")[1]:
+                                if int(str(row["DATE"]).split("/")[1]) == 3:
                                     third_mothly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "March":
@@ -347,17 +345,17 @@ class TheApp:
                             if "," in str(row["AMOUNT"]):
                                 row["AMOUNT"] = str(row["AMOUNT"]).replace(",", "")
                             if year in str(row['DATE']):
-                                if "04" in str(row["DATE"]).split("/")[1]:
+                                 if int(str(row["DATE"]).split("/")[1]) == 4:
                                     first_monthly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "April":
                                             x["Amount"] = str(first_monthly_sum)
-                                if "05" in str(row["DATE"]).split("/")[1]:
+                                 if int(str(row["DATE"]).split("/")[1]) == 5:
                                     second_monthly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "May":
                                             x["Amount"] = str(second_monthly_sum)
-                                if "06" in str(row["DATE"]).split("/")[1]:
+                                 if int(str(row["DATE"]).split("/")[1]) == 6:
                                     third_mothly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "June":
@@ -373,17 +371,17 @@ class TheApp:
                             if "," in str(row["AMOUNT"]):
                                 row["AMOUNT"] = str(row["AMOUNT"]).replace(",", "")
                             if year in str(row['DATE']):
-                                if "07" in str(row["DATE"]).split("/")[1]:
+                                 if int(str(row["DATE"]).split("/")[1]) == 7:
                                     first_monthly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "July":
                                             x["Amount"] = str(first_monthly_sum)
-                                if "08" in str(row["DATE"]).split("/")[1]:
+                                 if int(str(row["DATE"]).split("/")[1]) == 8:
                                     second_monthly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "August":
                                             x["Amount"] = str(second_monthly_sum)
-                                if "09" in str(row["DATE"]).split("/")[1]:
+                                 if int(str(row["DATE"]).split("/")[1]) == 9:
                                     third_mothly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "September":
@@ -399,17 +397,17 @@ class TheApp:
                             if "," in str(row["AMOUNT"]):
                                 row["AMOUNT"] = str(row["AMOUNT"]).replace(",", "")
                             if year in str(row['DATE']):
-                                if "10" in str(row["DATE"]).split("/")[1]:
+                                 if int(str(row["DATE"]).split("/")[1]) == 10:
                                     first_monthly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "October":
                                             x["Amount"] = str(first_monthly_sum)
-                                if "11" in str(row["DATE"]).split("/")[1]:
+                                 if int(str(row["DATE"]).split("/")[1]) == 11:
                                     second_monthly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "November":
                                             x["Amount"] = str(second_monthly_sum)
-                                if "12" in str(row["DATE"]).split("/")[1]:
+                                 if int(str(row["DATE"]).split("/")[1]) == 12:
                                     third_mothly_sum += float(row["AMOUNT"])
                                     for x in monthly:
                                         if x["Month"] == "December":
@@ -703,7 +701,6 @@ class TheApp:
             QTableView.SelectRows)
         self.all_payments.ui.all_payments_view.font().setPointSize(42);
         self.all_payments.ui.all_payments_view.setSortingEnabled(True)
-
 
 app = QApplication([])
 a = TheApp()
